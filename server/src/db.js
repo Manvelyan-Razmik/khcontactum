@@ -18,16 +18,17 @@
 
 
 // server/src/db.js
+// server/src/db.js
 import pg from "pg";
 import dotenv from "dotenv";
 
 dotenv.config();
 const { Pool } = pg;
 
+console.log("DATABASE_URL =", process.env.DATABASE_URL); // ⬅️ լոգի համար, որ Render-ում տեսնենք
+
 export const pool = new Pool({
-  connectionString: process.env.DATABASE_URL + "?sslmode=require", // 🟢 սա ավելացրու
-  ssl: {
-    rejectUnauthorized: false, // 🟢 սա թող մնա
-  },
+  connectionString: process.env.DATABASE_URL,
 });
+
 

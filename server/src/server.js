@@ -68,6 +68,13 @@ app.use((req, _res, next) => {
   next();
 });
 
+// 👉 Ավելացնենք ROOT ռոուտ, որ khcontactum.com բացելիս պարզ պատասխան տա
+app.get("/", (_req, res) => {
+  res
+    .status(200)
+    .send("✅ KHContactum backend is running. Try /api/health for JSON.");
+});
+
 // health
 app.get("/api/health", (_req, res) => res.json({ ok: true }));
 

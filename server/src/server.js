@@ -81,18 +81,15 @@ const corsOptions = {
       return cb(null, true);
     }
 
-    // ⬇️ Debug-ի համար՝ log ենք անում, բայց չենք արգելում,
-    // որ Chrome-ը "CORS error" չգրի, իրական error-ը երևա.
+    // Debug-ի համար՝ log, բայց չենք կտրում request-ը
     console.warn("⚠️ CORS: non-whitelisted origin:", origin);
     return cb(null, true);
   },
   credentials: true,
 };
 
-// Գլոբալ CORS middleware
+// Գլոբալ CORS middleware (OPTIONS-ներն էլ կն обработки)
 app.use(cors(corsOptions));
-// Explicit preflight support (OPTIONS *), որ browser-ը չխփի 502 / CORS error
-app.options("*", cors(corsOptions));
 
 /* ================== BODY & COOKIES ================== */
 

@@ -13,17 +13,32 @@ import uploadRoutes from "./routes/upload.js";
 
 import path from "path";
 import { fileURLToPath } from "url";
+import { pool } from "./db.js";
 
 const app = express();
 const PORT = process.env.PORT || 5050;
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "http://localhost:5173";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname  = path.dirname(__filename);
-const DATA_DIR   = path.join(__dirname, "../data");
+// trust proxy flag (Render-ում TRUST_PROXY=1, development-ում՝ 0 կամ դատարկ)
+const TRUST_PROXY_ENABLED = process.env.TRUST_PROXY === "1";
 
-// ✅ իրական client IP-ների համար (Nginx / Cloudflare-ի հետևում)
-app.set("trust proxy", process.env.TRUST_PROXY ? 1 : 0);
+// __dirname setup (ESM)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const DATA_DIR = path.join(__dirname, "../data");
+
+// ✅ Check DB connection once on startup (doesn't stop server if fails)
+(async () => {
+  try {
+    const res = await pool.query("SELECT NOW()");
+    console.log("✅ PostgreSQL connected at:", res.rows[0].now);
+  } catch (err) {
+    console.error("❌ PostgreSQL connection failed:", err.message);
+  }
+})();
+
+// ✅ իրական client IP-ների համար (Nginx / Cloudflare / Render proxy)
+app.set("trust proxy", TRUST_PROXY_ENABLED ? 1 : 0);
 
 /* ✅ Helmet — թույլ ենք տալիս cross-origin resources (նկար, video)
    որ կարողանաս օգտագործել դրանք localhost:5173 front-end-ում */
@@ -62,11 +77,11 @@ app.get("/api/ping", (_req, res) =>
 );
 
 /* ===== ROUTES (ORDER MATTERS) ===== */
-app.use("/api/public",     publicRoutes);
+app.use("/api/public", publicRoutes);
 app.use("/api/superadmin", superadminRoutes);
-app.use("/api/admin",      adminRoutes);
-app.use("/api/admin",      passwordRoutes); // թողնում եմ ինչպես ունեիր
-app.use("/api/upload",     uploadRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/admin", passwordRoutes); // թողնում եմ ինչպես ունեիր
+app.use("/api/upload", uploadRoutes);
 
 // static jsons (public data)
 app.use("/public-data", express.static(path.join(DATA_DIR, "public")));
@@ -88,6 +103,9 @@ app.use("/api", (_req, res) =>
 );
 
 app.listen(PORT, () => {
-  console.log(`Server on http://localhost:${PORT}`);
-  console.log(`Allowed CORS origin: ${CLIENT_ORIGIN}`);
+  console.log(`🚀 Server listening on port ${PORT}`);
+  console.log(`✅ Allowed CORS origin: ${CLIENT_ORIGIN}`);
+  console.log(
+    `🔧 trust proxy: ${TRUST_PROXY_ENABLED ? "enabled (1)" : "disabled (0)"}`
+  );
 });

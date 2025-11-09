@@ -18,22 +18,32 @@ import { pool } from "./db.js";
 const app = express();
 const PORT = process.env.PORT || 5050;
 
-// ✅ Թույլատրած origin-ներ (comma-separated env → array)
-const CLIENT_ORIGINS = (
+/* ================== CORS ORIGINS ================== */
+/**
+ * CLIENT_ORIGIN env-ը կարող է լինել
+ * "https://khcontactum.com"
+ * կամ comma-separated list:
+ * "http://localhost:5173,https://khcontactum.com"
+ */
+const RAW_ORIGINS =
   process.env.CLIENT_ORIGIN ||
-  "http://localhost:5173,https://khcontactum.com,https://www.khcontactum.com"
-)
-  .split(",")
+  "http://localhost:5173,https://khcontactum.com,https://www.khcontactum.com";
+
+const ALLOWED_ORIGINS = RAW_ORIGINS.split(",")
   .map((s) => s.trim())
   .filter(Boolean);
 
 // trust proxy flag (Render-ում TRUST_PROXY=1, development-ում՝ 0 կամ դատարկ)
 const TRUST_PROXY_ENABLED = process.env.TRUST_PROXY === "1";
 
+/* ================== PATHS ================== */
+
 // __dirname setup (ESM)
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const DATA_DIR = path.join(__dirname, "../data");
+
+/* ================== DB CHECK ================== */
 
 // ✅ Check DB connection once on startup (doesn't stop server if fails)
 (async () => {
@@ -44,6 +54,8 @@ const DATA_DIR = path.join(__dirname, "../data");
     console.error("❌ PostgreSQL connection failed:", err.message);
   }
 })();
+
+/* ================== APP SETUP ================== */
 
 // ✅ իրական client IP-ների համար (Nginx / Cloudflare / Render proxy)
 app.set("trust proxy", TRUST_PROXY_ENABLED ? 1 : 0);
@@ -58,35 +70,45 @@ app.use(
   })
 );
 
-// ✅ CORS config — բազմակի origin + preflight support
+/* ================== CORS ================== */
+
 const corsOptions = {
   origin(origin, cb) {
-    // Postman / curl / health-check-եր origin չեն ուղարկում
+    // Postman / curl / Render health-check-եր origin չեն ուղարկում
     if (!origin) return cb(null, true);
 
-    if (CLIENT_ORIGINS.includes(origin)) {
+    if (ALLOWED_ORIGINS.includes(origin)) {
       return cb(null, true);
     }
 
-    console.warn("❌ Blocked by CORS:", origin);
-    return cb(new Error("Not allowed by CORS"));
+    // ⬇️ Debug-ի համար՝ log ենք անում, բայց չենք արգելում,
+    // որ Chrome-ը "CORS error" չգրի, իրական error-ը երևա.
+    console.warn("⚠️ CORS: non-whitelisted origin:", origin);
+    return cb(null, true);
   },
   credentials: true,
 };
 
-// ⬇️ Գլոբալ CORS middleware (preflight-երը արդեն ինքը կսպասարկի)
+// Գլոբալ CORS middleware
 app.use(cors(corsOptions));
+// Explicit preflight support (OPTIONS *), որ browser-ը չխփի 502 / CORS error
+app.options("*", cors(corsOptions));
+
+/* ================== BODY & COOKIES ================== */
 
 app.use(express.json());
 app.use(cookieParser());
 
-// mini logger
+/* ================== MINI LOGGER ================== */
+
 app.use((req, _res, next) => {
   console.log(
     `[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`
   );
   next();
 });
+
+/* ================== BASIC ROUTES ================== */
 
 // 👉 ROOT route
 app.get("/", (_req, res) => {
@@ -99,16 +121,17 @@ app.get("/", (_req, res) => {
 app.get("/api/health", (_req, res) => res.json({ ok: true }));
 
 // debug ping
-app.get("/api/ping", (_req, res) =>
-  res.json({ ok: true, via: "server" })
-);
+app.get("/api/ping", (_req, res) => res.json({ ok: true, via: "server" }));
 
-/* ===== ROUTES (ORDER MATTERS) ===== */
+/* ================== API ROUTES ================== */
+// (ORDER MATTERS)
 app.use("/api/public", publicRoutes);
 app.use("/api/superadmin", superadminRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/admin", passwordRoutes); // ինչպես ունեիր
 app.use("/api/upload", uploadRoutes);
+
+/* ================== STATIC FILES ================== */
 
 // static jsons (public data)
 app.use("/public-data", express.static(path.join(DATA_DIR, "public")));
@@ -124,14 +147,15 @@ app.use(
   express.static(path.join(process.cwd(), "uploads"))
 );
 
-// API 404
-app.use("/api", (_req, res) =>
-  res.status(404).json({ error: "Not Found" })
-);
+/* ================== API 404 ================== */
+
+app.use("/api", (_req, res) => res.status(404).json({ error: "Not Found" }));
+
+/* ================== START SERVER ================== */
 
 app.listen(PORT, () => {
   console.log(`🚀 Server listening on port ${PORT}`);
-  console.log("✅ Allowed CORS origins:", CLIENT_ORIGINS);
+  console.log("✅ Allowed CORS origins:", ALLOWED_ORIGINS);
   console.log(
     `🔧 trust proxy: ${TRUST_PROXY_ENABLED ? "enabled (1)" : "disabled (0)"}`
   );

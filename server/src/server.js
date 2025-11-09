@@ -18,7 +18,7 @@ import { pool } from "./db.js";
 const app = express();
 const PORT = process.env.PORT || 5050;
 
-// ✅ Թույլատրած origin-ները (կարող ես ավելացնել ևս)
+// ✅ Թույլատրած origin-ներ (comma-separated env → array)
 const CLIENT_ORIGINS = (
   process.env.CLIENT_ORIGIN ||
   "http://localhost:5173,https://khcontactum.com,https://www.khcontactum.com"
@@ -49,7 +49,7 @@ const DATA_DIR = path.join(__dirname, "../data");
 app.set("trust proxy", TRUST_PROXY_ENABLED ? 1 : 0);
 
 /* ✅ Helmet — թույլ ենք տալիս cross-origin resources (նկար, video)
-   որ կարողանաս օգտագործել դրանք localhost:5173 front-end-ում */
+   որ կարողանաս օգտագործել դրանք front-end-ում */
 app.use(
   helmet({
     crossOriginEmbedderPolicy: false,
@@ -61,7 +61,7 @@ app.use(
 // ✅ CORS config — բազմակի origin + preflight support
 const corsOptions = {
   origin(origin, cb) {
-    // Postman/curl և այլն origin չունեն → թողնում ենք
+    // Postman / curl / health-check-եր origin չեն ուղարկում
     if (!origin) return cb(null, true);
 
     if (CLIENT_ORIGINS.includes(origin)) {
@@ -74,10 +74,8 @@ const corsOptions = {
   credentials: true,
 };
 
-// ⬇️ Սկզբում դնում ենք CORS middleware-ը
 app.use(cors(corsOptions));
-
-// ⬇️ Preflight OPTIONS-ների համար, որ չընկնեն 404/502
+// Preflight OPTIONS-ների համար
 app.options("*", cors(corsOptions));
 
 app.use(express.json());
@@ -91,7 +89,7 @@ app.use((req, _res, next) => {
   next();
 });
 
-// 👉 ROOT route, որ khcontactum.onrender.com բացելիս պարզ պատասխան տա
+// 👉 ROOT route
 app.get("/", (_req, res) => {
   res
     .status(200)
@@ -110,7 +108,7 @@ app.get("/api/ping", (_req, res) =>
 app.use("/api/public", publicRoutes);
 app.use("/api/superadmin", superadminRoutes);
 app.use("/api/admin", adminRoutes);
-app.use("/api/admin", passwordRoutes); // թողնում եմ ինչպես ունեիր
+app.use("/api/admin", passwordRoutes); // ինչպես ունեիր
 app.use("/api/upload", uploadRoutes);
 
 // static jsons (public data)
@@ -134,7 +132,7 @@ app.use("/api", (_req, res) =>
 
 app.listen(PORT, () => {
   console.log(`🚀 Server listening on port ${PORT}`);
-  console.log(`✅ Allowed CORS origins:`, CLIENT_ORIGINS);
+  console.log("✅ Allowed CORS origins:", CLIENT_ORIGINS);
   console.log(
     `🔧 trust proxy: ${TRUST_PROXY_ENABLED ? "enabled (1)" : "disabled (0)"}`
   );

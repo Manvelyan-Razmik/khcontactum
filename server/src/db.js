@@ -25,8 +25,9 @@ dotenv.config();
 const { Pool } = pg;
 
 export const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,   // ⬅️ օգտվում ենք ամբողջական URL-ից
+  connectionString: process.env.DATABASE_URL + "?sslmode=require", // 🟢 սա ավելացրու
   ssl: {
-    rejectUnauthorized: false,                 // Render-ի համար պետք է թողնես
+    rejectUnauthorized: false, // 🟢 սա թող մնա
   },
 });
+

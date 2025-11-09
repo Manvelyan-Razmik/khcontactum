@@ -17,7 +17,15 @@ import { pool } from "./db.js";
 
 const app = express();
 const PORT = process.env.PORT || 5050;
-const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "http://localhost:5173";
+
+// ✅ Թույլատրած origin-ները (կարող ես ավելացնել ևս)
+const CLIENT_ORIGINS = (
+  process.env.CLIENT_ORIGIN ||
+  "http://localhost:5173,https://khcontactum.com,https://www.khcontactum.com"
+)
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
 
 // trust proxy flag (Render-ում TRUST_PROXY=1, development-ում՝ 0 կամ դատարկ)
 const TRUST_PROXY_ENABLED = process.env.TRUST_PROXY === "1";
@@ -50,13 +58,28 @@ app.use(
   })
 );
 
-// ✅ CORS / body
-app.use(
-  cors({
-    origin: CLIENT_ORIGIN,
-    credentials: true,
-  })
-);
+// ✅ CORS config — բազմակի origin + preflight support
+const corsOptions = {
+  origin(origin, cb) {
+    // Postman/curl և այլն origin չունեն → թողնում ենք
+    if (!origin) return cb(null, true);
+
+    if (CLIENT_ORIGINS.includes(origin)) {
+      return cb(null, true);
+    }
+
+    console.warn("❌ Blocked by CORS:", origin);
+    return cb(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+};
+
+// ⬇️ Սկզբում դնում ենք CORS middleware-ը
+app.use(cors(corsOptions));
+
+// ⬇️ Preflight OPTIONS-ների համար, որ չընկնեն 404/502
+app.options("*", cors(corsOptions));
+
 app.use(express.json());
 app.use(cookieParser());
 
@@ -68,7 +91,7 @@ app.use((req, _res, next) => {
   next();
 });
 
-// 👉 Ավելացնենք ROOT ռոուտ, որ khcontactum.com բացելիս պարզ պատասխան տա
+// 👉 ROOT route, որ khcontactum.onrender.com բացելիս պարզ պատասխան տա
 app.get("/", (_req, res) => {
   res
     .status(200)
@@ -111,7 +134,7 @@ app.use("/api", (_req, res) =>
 
 app.listen(PORT, () => {
   console.log(`🚀 Server listening on port ${PORT}`);
-  console.log(`✅ Allowed CORS origin: ${CLIENT_ORIGIN}`);
+  console.log(`✅ Allowed CORS origins:`, CLIENT_ORIGINS);
   console.log(
     `🔧 trust proxy: ${TRUST_PROXY_ENABLED ? "enabled (1)" : "disabled (0)"}`
   );

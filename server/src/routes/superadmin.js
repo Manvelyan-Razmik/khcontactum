@@ -13,10 +13,10 @@ const r = Router();
    + 2-րդ գաղտնի կոդ (OTP) env-ից
    ============================================================ */
 
-const MAX_FAILS = 7;
+const MAX_FAILS      = 7;
 const WINDOW_MINUTES = 3;
-const LOCK_MINUTES = 30;
-const superAttempts = new Map(); // key: ip => { fails, first, lockUntil }
+const LOCK_MINUTES   = 30;
+const superAttempts  = new Map(); // key: ip => { fails, first, lockUntil }
 
 function getClientIp(req) {
   const xfwd = req.headers["x-forwarded-for"];
@@ -48,7 +48,7 @@ function isLocked(rec) {
 
 /* --- Superadmin Login (env-ից է, ոչ DB-ից) --- */
 r.post("/login", async (req, res) => {
-  const ip = getClientIp(req);
+  const ip  = getClientIp(req);
   const rec = getRecord(ip);
 
   if (isLocked(rec)) {
@@ -61,7 +61,7 @@ r.post("/login", async (req, res) => {
   const { username, password, otp } = req.body || {};
   const envUser = process.env.SUPERADMIN_USERNAME || "superadmin";
   const envHash = process.env.SUPERADMIN_PASS_HASH || "";
-  const envOtp = process.env.SUPERADMIN_OTP_CODE || "";
+  const envOtp  = process.env.SUPERADMIN_OTP_CODE || "";
 
   if (!username || !password || !otp) {
     return res
@@ -74,7 +74,7 @@ r.post("/login", async (req, res) => {
       rec.fails++;
     } else {
       const okPass = await bcrypt.compare(password || "", envHash || "");
-      const okOtp = otp === envOtp;
+      const okOtp  = otp === envOtp;
 
       if (!okPass || !okOtp) {
         rec.fails++;
@@ -106,33 +106,21 @@ r.post("/login", async (req, res) => {
 });
 
 /* --- Admins CRUD (միայն superadmin) --- */
-
-// List admins
 r.get("/admins", auth("superadmin"), async (_req, res) => {
-  try {
-    const { rows } = await pool.query(
-      "SELECT id, username, card_id, is_active, created_at, updated_at FROM admins ORDER BY id DESC"
-    );
-    return res.json(rows);
-  } catch (e) {
-    console.error("Superadmin GET /admins error:", e);
-    return res
-      .status(500)
-      .json({ error: e.message || "Server error (get admins)" });
-  }
+  const { rows } = await pool.query(
+    "SELECT id, username, card_id, is_active, created_at, updated_at FROM admins ORDER BY id DESC"
+  );
+  res.json(rows);
 });
 
-// Create admin
 r.post("/admins", auth("superadmin"), async (req, res) => {
   const { username, password, card_id } = req.body || {};
-  if (!username || !password || card_id === undefined) {
+  if (!username || !password || card_id === undefined)
     return res
       .status(400)
       .json({ error: "username, password, card_id required" });
-  }
 
   const hash = await bcrypt.hash(password, 10);
-
   try {
     const { rows } = await pool.query(
       `INSERT INTO admins (username, password_hash, card_id)
@@ -142,31 +130,22 @@ r.post("/admins", auth("superadmin"), async (req, res) => {
     );
     const admin = rows[0];
 
-    try {
-      await pool.query(
-        `INSERT INTO admin_profiles (admin_id, display_name, headline, bio, contacts)
-         VALUES ($1,'','','','{}'::jsonb)
-         ON CONFLICT (admin_id) DO NOTHING`,
-        [admin.id]
-      );
-    } catch (e2) {
-      // Եթե admin_profiles չկա կամ ուրիշ խնդիր կա՝ log միայն
-      console.error("Insert into admin_profiles error:", e2);
-    }
+    await pool.query(
+      `INSERT INTO admin_profiles (admin_id, display_name, headline, bio, contacts)
+       VALUES ($1,'','','','{}'::jsonb)
+       ON CONFLICT (admin_id) DO NOTHING`,
+      [admin.id]
+    );
 
-    return res.status(201).json(admin);
+    res.status(201).json(admin);
   } catch (e) {
-    console.error("Superadmin POST /admins error:", e);
-    if (e.code === "23505") {
+    if (e.code === "23505")
       return res.status(409).json({ error: "username exists" });
-    }
-    return res
-      .status(500)
-      .json({ error: e.message || "Server error (create admin)" });
+    console.error(e);
+    res.status(500).json({ error: "Server error" });
   }
 });
 
-// Update admin
 r.patch("/admins/:id", auth("superadmin"), async (req, res) => {
   const id = Number(req.params.id);
   const { password, card_id, is_active, username } = req.body || {};
@@ -195,9 +174,8 @@ r.patch("/admins/:id", auth("superadmin"), async (req, res) => {
     vals.push(username);
   }
 
-  if (!sets.length) {
+  if (!sets.length)
     return res.status(400).json({ error: "Nothing to update" });
-  }
 
   vals.push(id);
 
@@ -207,35 +185,23 @@ r.patch("/admins/:id", auth("superadmin"), async (req, res) => {
        RETURNING id, username, card_id, is_active, created_at, updated_at`,
       vals
     );
-    if (!rows[0]) {
-      return res.status(404).json({ error: "Not found" });
-    }
-    return res.json(rows[0]);
+    if (!rows[0]) return res.status(404).json({ error: "Not found" });
+    res.json(rows[0]);
   } catch (e) {
-    console.error("Superadmin PATCH /admins/:id error:", e);
     if (e.code === "23505") {
       return res
         .status(409)
         .json({ error: "username or card_id already exists" });
     }
-    return res
-      .status(500)
-      .json({ error: e.message || "Server error (update admin)" });
+    console.error(e);
+    res.status(500).json({ error: "Server error" });
   }
 });
 
-// Delete admin
 r.delete("/admins/:id", auth("superadmin"), async (req, res) => {
   const id = Number(req.params.id);
-  try {
-    await pool.query("DELETE FROM admins WHERE id=$1", [id]);
-    return res.json({ ok: true });
-  } catch (e) {
-    console.error("Superadmin DELETE /admins/:id error:", e);
-    return res
-      .status(500)
-      .json({ error: e.message || "Server error (delete admin)" });
-  }
+  await pool.query("DELETE FROM admins WHERE id=$1", [id]);
+  res.json({ ok: true });
 });
 
 export default r;

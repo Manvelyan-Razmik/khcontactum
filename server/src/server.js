@@ -74,9 +74,8 @@ const corsOptions = {
   credentials: true,
 };
 
+// ⬇️ Գլոբալ CORS middleware (preflight-երը արդեն ինքը կսպասարկի)
 app.use(cors(corsOptions));
-// Preflight OPTIONS-ների համար
-app.options("*", cors(corsOptions));
 
 app.use(express.json());
 app.use(cookieParser());

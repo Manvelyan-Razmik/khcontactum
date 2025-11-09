@@ -1,0 +1,705 @@
+
+
+/* որ բոլոր էլեմենտները ժառանգեն body-ի ֆոնտը */
+* {
+  font-family: "Roboto", "Noto Sans Armenian", sans-serif;
+}
+
+/* HomePage.responsive.css */
+
+/* ====== 480px և ներքև – ընդհանուր mobile view ====== */
+@media (max-width: 480px) {
+  .public-scroll-layer {
+    padding: 10px;
+  }
+
+  .public-home .card {
+    padding: 10px 10px 16px !important;
+    margin-bottom: 18px;
+    border-radius: 14px;
+  }
+
+  .hero-title {
+    font-size: 28px !important;
+    margin: 12px 0 6px !important;
+  }
+
+  .hero-desc {
+    font-size: 15px !important;
+    line-height: 1.5 !important;
+    max-width: 92% !important;
+  }
+}
+
+/* ====== 360px և ներքև – fonts/gap մի քիչ ավելի փոքր ====== */
+@media (max-width: 360px) {
+  .public-scroll-layer {
+    padding: 8px;
+  }
+
+  .public-home .card {
+    padding: 8px 8px 14px !important;
+    margin-bottom: 16px;
+  }
+
+  .hero-title {
+    font-size: 24px !important;
+  }
+
+  .hero-desc {
+    font-size: 14px !important;
+    max-width: 94% !important;
+  }
+}
+
+/* ====== 320px և ներքև – փոքր էկրաններ (iPhone SE, այլն) ====== */
+@media (max-width: 320px) {
+  .public-scroll-layer {
+    padding: 6px;
+  }
+
+  .public-home .card {
+    padding: 8px 6px 12px !important;
+  }
+
+  .hero-title {
+    font-size: 20px !important;
+  }
+
+  .hero-desc {
+    font-size: 13px !important;
+    line-height: 1.45 !important;
+  }
+}
+
+/* ====== 280px և ներքև – Galaxy Fold ui շատ նեղ էկրան ====== */
+@media (max-width: 280px) {
+  .public-scroll-layer {
+    padding: 4px;
+  }
+
+  .public-home .card {
+    padding: 6px 4px 10px !important;
+    margin-bottom: 12px;
+    border-radius: 12px;
+  }
+
+  .hero-title {
+    font-size: 18px !important;
+    margin: 10px 0 4px !important;
+  }
+
+  .hero-desc {
+    font-size: 12px !important;
+    max-width: 96% !important;
+  }
+}
+
+
+
+/* BrandsPage.responsive.css */
+
+/* ===== 480px և ներքև – ընդհանուր mobile view ===== */
+@media (max-width: 480px) {
+  .brands-public {
+    padding: 8px 10px !important;
+  }
+
+  .brands-public .company-title {
+    font-size: 22px !important;
+    margin: 12px 0 20px !important;
+  }
+
+  /* 1 սյուն (brand-item) – row layout */
+  .brand-item {
+    padding: 8px 10px !important;
+    gap: 10px !important;
+  }
+
+  .brand-item > div {
+    width: 56px !important;
+    height: 56px !important;
+  }
+
+  .brand-item span {
+    font-size: 14px !important;
+  }
+
+  /* բազմասյուն grid (2/3 cols) */
+  .brands-grid {
+    gap: 14px !important;
+    /* էստեղ դեռ px-երով գրված է JS-ից, ok է մեծ mobile-ներին */
+  }
+
+  .brand-card > div:first-child {
+    width: 84px !important;
+    height: 84px !important;
+  }
+
+  .brand-card span {
+    font-size: 12px !important;
+    max-width: 140px !important;
+  }
+}
+
+/* ===== 360px և ներքև – փոքր սմարթֆոններ ===== */
+@media (max-width: 360px) {
+  .brands-public {
+    padding: 6px 8px !important;
+  }
+
+  .brands-public .company-title {
+    font-size: 20px !important;
+    margin: 10px 0 18px !important;
+  }
+
+  .brand-item {
+    padding: 8px 8px !important;
+  }
+
+  .brand-item > div {
+    width: 52px !important;
+    height: 52px !important;
+  }
+
+  .brand-item span {
+    font-size: 13px !important;
+  }
+
+  .brands-grid {
+    gap: 12px !important;
+    /* ⚠️ պահում ենք ՄԻՇՏ 3 սյուն narrow–ին էլ */
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  .brand-card > div:first-child {
+    width: 72px !important;   /* մի քիչ փոքր, որ 3-ը տեղավորվի */
+    height: 72px !important;
+  }
+
+  .brand-card span {
+    font-size: 11.5px !important;
+    max-width: 100px !important;  /* քիչ ավելի նեղ, որ չքաշի լայնությունը */
+  }
+}
+
+/* ===== 320px և ներքև – iPhone SE և այլն ===== */
+@media (max-width: 320px) {
+  .brands-public {
+    padding: 6px 6px !important;
+  }
+
+  .brands-public .company-title {
+    font-size: 18px !important;
+  }
+
+  .brand-item {
+    padding: 6px 6px !important;
+    gap: 8px !important;
+  }
+
+  .brand-item > div {
+    width: 48px !important;
+    height: 48px !important;
+  }
+
+  .brand-item span {
+    font-size: 12px !important;
+  }
+
+  .brands-grid {
+    gap: 8px !important;
+    /* 🟢 3 սյուն even here */
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  .brand-card > div:first-child {
+    width: 60px !important;
+    height: 60px !important;
+  }
+
+  .brand-card span {
+    font-size: 10.5px !important;
+    max-width: 88px !important;  /* քիչ նեղ, որ չբացվի սյունը */
+  }
+}
+
+/* ===== 280px և ներքև – Galaxy Fold ultra narrow ===== */
+@media (max-width: 280px) {
+  .brands-public {
+    padding: 4px 4px !important;
+  }
+
+  .brands-public .company-title {
+    font-size: 16px !important;
+    margin: 8px 0 14px !important;
+  }
+
+  .brand-item {
+    padding: 6px 4px !important;
+    gap: 6px !important;
+  }
+
+  .brand-item > div {
+    width: 44px !important;
+    height: 44px !important;
+  }
+
+  .brand-item span {
+    font-size: 11px !important;
+  }
+
+  .brands-grid {
+    gap: 6px !important;
+    /* 🟢 Galaxy Fold–ին էլ 3 սյուն ենք պահում */
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  .brand-card > div:first-child {
+    width: 52px !important;
+    height: 52px !important;
+  }
+
+  .brand-card span {
+    font-size: 9.5px !important;
+    max-width: 78px !important;
+  }
+}
+
+
+
+/* BrandInfoPage.responsive.css */
+
+/* 🔹 Base override – back կոճակին այլևս width:100% չլինի */
+.brandinfo-public .btn {
+  width: auto !important;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===== 480px և ներքև – ընդհանուր mobile ===== */
+@media (max-width: 480px) {
+  .brandinfo-public {
+    padding: 8px 10px !important;
+  }
+
+  .brandinfo-public .company-title {
+    font-size: 18px !important;
+  }
+
+  .brandinfo-public .btn {
+    padding: 6px 10px !important;
+    border-radius: 999px !important;
+    font-size: 14px !important;
+  }
+
+  .worker-card-public {
+    padding: 14px !important;
+    margin-bottom: 14px !important;
+  }
+}
+
+/* ===== 360px և ներքև – փոքր սմարթֆոններ ===== */
+@media (max-width: 360px) {
+  .brandinfo-public {
+    padding: 6px 8px !important;
+  }
+
+  .brandinfo-public .company-title {
+    font-size: 17px !important;
+  }
+
+  .brandinfo-public .btn {
+    padding: 5px 9px !important;
+    font-size: 13px !important;
+  }
+
+  /* avatar շրջան */
+  .worker-card-public > div:first-child {
+    width: 90px !important;
+    height: 90px !important;
+  }
+
+  .worker-card-public h3 {
+    font-size: 16px !important;
+  }
+
+  /* desc բլոկը (3-րդ div) */
+  .worker-card-public > div:nth-child(3) {
+    font-size: 13px !important;
+    max-width: 280px !important;
+    padding: 8px 10px !important;
+  }
+
+  /* slide box-ի բարձրությունը */
+  .worker-card-public > div:nth-child(4) > div:first-child {
+    height: 180px !important;
+  }
+}
+
+/* ===== 320px և ներքև – շատ նեղ էկրաններ ===== */
+@media (max-width: 320px) {
+  .brandinfo-public {
+    padding: 6px 6px !important;
+  }
+
+  .brandinfo-public .company-title {
+    font-size: 16px !important;
+  }
+
+  .brandinfo-public .btn {
+    padding: 4px 8px !important;
+    font-size: 12px !important;
+  }
+
+  .worker-card-public {
+    padding: 10px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .worker-card-public > div:first-child {
+    width: 80px !important;
+    height: 80px !important;
+  }
+
+  .worker-card-public h3 {
+    font-size: 15px !important;
+  }
+
+  .worker-card-public > div:nth-child(3) {
+    font-size: 12px !important;
+    max-width: 260px !important;
+    padding: 8px 10px !important;
+  }
+
+  .worker-card-public > div:nth-child(4) > div:first-child {
+    height: 165px !important;
+  }
+
+  /* սլայդերի < և > կոճակները */
+  .worker-card-public > div:nth-child(4) button {
+    width: 26px !important;
+    height: 26px !important;
+  }
+
+  /* like / dislike կոճակներ */
+  .worker-card-public button {
+    font-size: 12px !important;
+    padding: 5px 10px !important;
+  }
+}
+
+/* ===== 280px și ներքև – Galaxy Fold ultra narrow ===== */
+@media (max-width: 280px) {
+  .brandinfo-public {
+    padding: 4px 4px !important;
+  }
+
+  .brandinfo-public .company-title {
+    font-size: 15px !important;
+  }
+
+  .brandinfo-public .btn {
+    padding: 4px 8px !important;
+    font-size: 11px !important;
+  }
+
+  .worker-card-public {
+    padding: 8px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .worker-card-public > div:first-child {
+    width: 72px !important;
+    height: 72px !important;
+  }
+
+  .worker-card-public h3 {
+    font-size: 14px !important;
+  }
+
+  .worker-card-public > div:nth-child(3) {
+    font-size: 11px !important;
+    max-width: 240px !important;
+    padding: 6px 8px !important;
+  }
+
+  .worker-card-public > div:nth-child(4) > div:first-child {
+    height: 150px !important;
+  }
+
+  .worker-card-public > div:nth-child(4) button {
+    width: 24px !important;
+    height: 24px !important;
+  }
+
+  .worker-card-public button {
+    font-size: 11px !important;
+    padding: 4px 8px !important;
+  }
+}
+
+
+/* SharePage.responsive.css */
+
+/* ===== 480px և ներքև – ընդհանուր mobile ===== */
+@media (max-width: 480px) {
+  /* share բաժնի section-ը HomePage-ի մեջ միշտ վերջինն է */
+  .public-scroll-layer section:last-of-type {
+    margin-top: 18px !important;
+    margin-bottom: 18px !important;
+    padding-inline: 6px;
+  }
+
+  .public-scroll-layer section:last-of-type h2 {
+    font-size: 18px;
+  }
+
+  .public-scroll-layer section:last-of-type h3 {
+    font-size: 15px;
+  }
+
+  .public-scroll-layer section:last-of-type .small {
+    font-size: 13px;
+  }
+
+  /* մեծ սև/գունավոր կոճակները */
+  .public-scroll-layer section:last-of-type .btn {
+    font-size: 14px;
+    padding: 10px 14px;
+  }
+
+  /* share icon-ների png-ները մի քիչ փոքր */
+  .share-icon-btn img {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  /* QR overlay card */
+  div[style*="position: fixed"] .card {
+    max-width: 340px !important;
+    width: 88% !important;
+    padding: 14px !important;
+  }
+
+  div[style*="position: fixed"] .card img {
+    width: 240px !important;
+    height: 240px !important;
+  }
+
+  div[style*="position: fixed"] .card .btn {
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+}
+
+/* ===== 360px և ներքև – փոքր սմարթֆոններ ===== */
+@media (max-width: 360px) {
+  .public-scroll-layer section:last-of-type {
+    margin-top: 16px !important;
+    margin-bottom: 16px !important;
+    padding-inline: 4px;
+  }
+
+  .public-scroll-layer section:last-of-type h2 {
+    font-size: 17px;
+  }
+
+  .public-scroll-layer section:last-of-type h3 {
+    font-size: 14px;
+  }
+
+  .public-scroll-layer section:last-of-type .btn {
+    font-size: 13px;
+    padding: 9px 12px;
+  }
+
+  .share-icon-btn img {
+    width: 30px !important;
+    height: 30px !important;
+  }
+
+  div[style*="position: fixed"] .card {
+    max-width: 320px !important;
+    width: 90% !important;
+    padding: 12px !important;
+  }
+
+  div[style*="position: fixed"] .card img {
+    width: 220px !important;
+    height: 220px !important;
+  }
+
+  div[style*="position: fixed"] .card .btn {
+    font-size: 12px;
+    padding: 5px 8px;
+  }
+}
+
+/* ===== 320px և ներքև – iPhone SE / շատ նեղ ===== */
+@media (max-width: 320px) {
+  .public-scroll-layer section:last-of-type {
+    margin-top: 14px !important;
+    margin-bottom: 14px !important;
+    padding-inline: 3px;
+  }
+
+  .public-scroll-layer section:last-of-type h2 {
+    font-size: 16px;
+  }
+
+  .public-scroll-layer section:last-of-type h3 {
+    font-size: 13px;
+  }
+
+  .public-scroll-layer section:last-of-type .small {
+    font-size: 12px;
+  }
+
+  .public-scroll-layer section:last-of-type .btn {
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+
+  .share-icon-btn img {
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  div[style*="position: fixed"] .card {
+    max-width: 300px !important;
+    width: 92% !important;
+    padding: 10px !important;
+  }
+
+  div[style*="position: fixed"] .card img {
+    width: 210px !important;
+    height: 210px !important;
+  }
+
+  div[style*="position: fixed"] .card .btn {
+    font-size: 11px;
+    padding: 4px 6px;
+  }
+}
+
+/* ===== 280px և ներքև – Galaxy Fold ultra narrow ===== */
+@media (max-width: 280px) {
+  .public-scroll-layer section:last-of-type {
+    margin-top: 12px !important;
+    margin-bottom: 12px !important;
+    padding-inline: 2px;
+  }
+
+  .public-scroll-layer section:last-of-type h2 {
+    font-size: 15px;
+  }
+
+  .public-scroll-layer section:last-of-type h3 {
+    font-size: 12px;
+  }
+
+  .public-scroll-layer section:last-of-type .small {
+    font-size: 11px;
+  }
+
+  .public-scroll-layer section:last-of-type .btn {
+    font-size: 11px;
+    padding: 7px 8px;
+  }
+
+  .share-icon-btn img {
+    width: 26px !important;
+    height: 26px !important;
+  }
+
+  div[style*="position: fixed"] .card {
+    max-width: 260px !important;
+    width: 94% !important;
+    padding: 8px !important;
+  }
+
+  div[style*="position: fixed"] .card img {
+    width: 190px !important;
+    height: 190px !important;
+  }
+
+  div[style*="position: fixed"] .card .btn {
+    font-size: 10px;
+    padding: 4px 5px;
+  }
+}
+
+/* ===== Share icons — 4 վերև, 3 ներքև կենտրոնում ===== */
+
+/* icon container-ը (էդ inline style-ով div-ն) կարգավորում ենք flex-ով */
+.public-scroll-layer section:last-of-type div[style*="justify-content: center"] {
+  display: flex !important;
+  flex-wrap: wrap;
+  justify-content: flex-start !important; /* որ մենք կառավարենք դիրքերը */
+  max-width: 360px;
+  margin: 0 auto 20px auto;
+  gap: 14px;
+}
+
+/* ամեն icon button */
+.public-scroll-layer section:last-of-type .share-icon-btn {
+  flex: 0 0 20%;             /* 4 icon մի տողի վրա */
+  display: flex;
+  justify-content: center;
+}
+
+/* 🔹 երկրորդ տողի 1-ին icon — ընդհանուր 5-րդը
+   տալիս ենք կես սյունքի չափ margin-left, որ 3 հատը գան մեջտեղ */
+.public-scroll-layer section:last-of-type .share-icon-btn:nth-child(5) {
+  margin-left: 40px;        /* 25% / 2 = կես սյուն */
+}
+
+/* ===== փոքր էկրանների հարմարեցում ===== */
+@media (max-width: 360px) {
+  .public-scroll-layer section:last-of-type div[style*="justify-content: center"] {
+    gap: 10px;
+  }
+
+  .public-scroll-layer section:last-of-type .share-icon-btn img {
+    width: 60px;
+    height: 60px;
+  }
+
+  .public-scroll-layer section:last-of-type .share-icon-btn:nth-child(5) {
+    margin-left: 15%;        /* մի քիչ պակաս, որ շատ ներս չգա */
+  }
+}
+
+@media (max-width: 320px) {
+  .public-scroll-layer section:last-of-type div[style*="justify-content: center"] {
+    gap: 8px;
+  }
+
+  .public-scroll-layer section:last-of-type .share-icon-btn img {
+    width: 35px;
+    height: 35px;
+  }
+
+  .public-scroll-layer section:last-of-type .share-icon-btn:nth-child(5) {
+    margin-left: 10%;
+  }
+}
+
+@media (max-width: 280px) {
+  .public-scroll-layer section:last-of-type div[style*="justify-content: center"] {
+    gap: 6px;
+  }
+
+  .public-scroll-layer section:last-of-type .share-icon-btn img {
+    width: 35px;
+    height: 35px;
+  }
+
+  .public-scroll-layer section:last-of-type .share-icon-btn:nth-child(5) {
+    margin-left: 12%;
+  }
+}
+

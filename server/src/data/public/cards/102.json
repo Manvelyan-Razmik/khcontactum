@@ -1,0 +1,44 @@
+{
+  "card_id": 102,
+  "updated_at": "2025-11-06T20:36:10.105Z",
+  "information": {
+    "avatar": {
+      "type": "image",
+      "imageUrl": "/file/1762461368375-e1xpe13u6q.png",
+      "videoUrl": ""
+    },
+    "company": {
+      "name": {
+        "am": "",
+        "ar": "",
+        "en": "",
+        "fr": "",
+        "ru": ""
+      },
+      "nameColor": "#000000"
+    },
+    "logo_url": "/file/1762461368375-e1xpe13u6q.png",
+    "background": {
+      "type": "color",
+      "color": "#ffffff",
+      "imageUrl": "",
+      "videoUrl": ""
+    },
+    "description": {
+      "am": "",
+      "ar": "",
+      "en": "",
+      "fr": "",
+      "ru": "",
+      "color": "#000000"
+    },
+    "default_lang": "am",
+    "available_langs": [
+      "am",
+      "ru",
+      "en",
+      "ar",
+      "fr"
+    ]
+  }
+}

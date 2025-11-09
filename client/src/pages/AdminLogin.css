@@ -1,0 +1,223 @@
+/* ------------- Admin Login special styles ------------- */
+
+.admin-login-root {
+  min-height: 100%;
+  padding: 13px 14px 13px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  box-sizing: border-box;
+}
+
+/* panel-ը այլևս քարտ չէ, ֆոն ու սահմանի չենք տալիս,
+   որ ամեն ինչ նստի ուղիղ PhoneShell-ի ֆոնի վրա */
+.admin-login-panel {
+  width: 100%;
+  max-width: 380px;
+  padding: 8px 4px 18px;
+  box-sizing: border-box;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  border: none;
+  color: #e5edf7;
+}
+
+/* վերևի տողը — KHContactum + լեզու */
+.admin-login-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.admin-login-app-title {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.admin-login-lang-select {
+    width: 50px;
+    height: 30px;
+    background-color: white;
+    border-radius: 5px;
+    font-size: 14px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.32);
+    padding: 2px;
+}
+
+/* form */
+.admin-login-form {
+  display: grid;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.admin-login-input {
+  background: rgba(15, 23, 42, 0.9);
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.7);
+  color: #e5edf7;
+}
+
+.admin-login-input::placeholder {
+  color: rgba(148, 163, 184, 0.9);
+}
+
+.admin-login-btn {
+  margin-top: 4px;
+  border-radius: 14px;
+  background: radial-gradient(circle at 0% 0%, #38bdf8 0, #0ea5e9 40%, #0369a1 100%);
+  border: 1px solid rgba(15, 23, 42, 0.9);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.admin-login-btn:active {
+  transform: translateY(1px);
+}
+
+.admin-login-error {
+  margin-top: 6px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  color: #fecaca;
+  background: rgba(127, 29, 29, 0.7);
+  border: 1px solid rgba(248, 113, 113, 0.9);
+}
+
+/* description բլոկ */
+.admin-login-description {
+  margin-top: 25px;
+  padding: 10px 11px;
+  border-radius: 16px;
+  background: linear-gradient(
+    135deg,
+    rgba(15, 23, 42, 0.95),
+    rgba(15, 23, 42, 0.95)
+  );
+  border: 1px solid rgba(148, 163, 184, 0.7);
+  font-size: 12px;
+  line-height: 1.6;
+  color: #e2e8f0;
+  text-align: justify;          /* ✅ երկու կողմերով հավասարեցում */
+  text-justify: inter-word;
+  width: 360px;
+}
+
+/* լոգոների շարք */
+.admin-login-logos {
+  margin-top: 14px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.admin-login-logo-img, .admin-login-logo-img1 {
+  object-fit: contain;
+  border-radius: 0;        /* հանում ենք կլորացումը */
+  padding: 0;              /* ← հանում ենք ներքին բացվածքը */
+  box-shadow: none;        /* ← հանում ենք ստվերը */
+  border: none;            /* ← հանում ենք սահմանը */
+}
+
+.admin-login-logo-img {
+    height: 130px;
+    width: 130px;
+    padding-top: 20px;
+}
+
+.admin-login-logo-img1 {
+    height: 160px;
+    width: 200px;
+}
+
+
+/* կապի icon-ների բլոկ */
+.admin-login-contacts {
+  margin-top: 16px;
+}
+
+.admin-login-contacts-label {
+  font-size: 18px;
+  opacity: 0.85;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.admin-login-contacts-row {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  width: 350px;
+  flex-wrap: nowrap;
+}
+
+/* «բյուրեղյա» icon-ներ՝ PNG-ներով */
+/* icon-ներ առանց ֆոնային gradient-ի */
+.admin-login-contact {
+  border-radius: 14px;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;                  /* ← հանում ենք սահմանը */
+  box-shadow: none;              /* ← հանում ենք ստվերը */
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.admin-login-contact img {
+  max-width: 60px;
+  max-height: 60px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 6px rgba(0, 200, 255, 0.25)); /* թեթև փայլ՝ ցանկության դեպքում */
+}
+
+.admin-login-contact:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
+.lang-select {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 6px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  backdrop-filter: blur(6px);
+  transition: all 0.2s ease;
+}
+.lang-select:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+
+
+/* փոքր էկրանների fine-tune */
+@media (max-width: 400px) {
+  .admin-login-panel {
+    padding: 8px 2px 18px;
+  }
+
+  .admin-login-logo-img {
+    max-width: 130px;
+    height: 64px;
+  }
+
+  .admin-login-contact {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+

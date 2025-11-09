@@ -1,0 +1,695 @@
+
+
+:root{
+  --bg:#0b0f14;
+  --shell:#11151b;
+  --bevel:#191f28;
+  --screen:#0f141a;
+  --text:#e8f1ff;
+
+}
+
+*{
+  box-sizing:border-box;
+ 
+}
+
+/* դուրսի ֆոն */
+body{
+  margin:0;
+  min-height:100dvh;
+  display:grid;
+  place-items:center;
+  background:#f5f7fb;
+  color:var(--text);
+}
+
+/* “հեռախոս” շրջանակը */
+.phone {
+  background: linear-gradient(145deg, var(--bevel), var(--shell));
+  border-radius: 32px;
+  padding: 14px;
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, .5),
+    inset 0 2px 4px rgba(255, 255, 255, .06);
+  display: flex;
+
+  /* ✅ Պահպանի նույն aspect-ratio-ն, բայց ավտոմատ սքեյլվի */
+  aspect-ratio: 416 / 829;
+  width: min(
+    416px,                                  /* հիմնական չափ */
+    100vw - 24px,                           /* որ կողքերից չկտրի */
+    calc((100dvh - 24px) * 416 / 829)       /* որ վերև-ներքև չկտրի */
+  );
+  height: auto;
+  max-height: 100dvh;                       /* որ բարձրությունից դուրս չգա */
+}
+
+
+/* ===== Screen THEMES ===== */
+
+/* default / admin dark mode */
+.screen{
+  width:100%;
+  height:100%;
+  border-radius:24px;
+  position: relative; /* popup-երի, absolute bg-ի համար */
+  color: var(--text);
+
+  /* scroll հեռախոսի ներսում */
+  overflow-y: auto;
+  scrollbar-width: none;        /* Firefox */
+  -ms-overflow-style: none;     /* IE/Edge */
+
+  background:radial-gradient(
+    90% 80% at 50% 20%,
+    #111a23 0%,
+    #21344d 50%,
+    #070a0d 100%
+  );
+}
+
+.screen::-webkit-scrollbar {
+  display: none;
+}
+
+
+.screen.light{
+  background:#ffffff;
+  color:#111;
+}
+
+
+.header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  font-weight:700;
+  letter-spacing:.5px;
+}
+
+.header .title{
+  opacity:.95;
+  margin:15px 25px 0 25px;
+  font-size:14px;
+  line-height:1.4;
+  color:inherit;
+}
+
+.header .right{
+  display:flex;
+  gap:8px;
+  margin:10px;
+}
+
+/* anchor՝ popup-ը ճիշտ դիրքավորվելու համար */
+.menu-anchor{
+  position: relative;
+}
+
+/* ===== Buttons in header ===== */
+.btn-ghost{
+  border:1px solid rgba(255,255,255,.14);
+  background:#0c1218;
+  color:var(--text);
+  padding:8px 12px;
+  border-radius:999px;
+  cursor:pointer;
+  font-weight:600;
+  font-size:14px;
+  line-height:1.2;
+}
+
+/* light theme override for that same header button */
+.screen.light .btn-ghost{
+  border:1px solid #e5e7eb;
+  background:#ffffff;
+  color:#111;
+}
+
+/* ===== Popup menu (⋮ սեղմելուց հետո բացվող dropdown) ===== */
+.popup-menu{
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 240px;
+  z-index: 30;
+  background: #fff;
+  color: #111;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+  overflow: hidden;
+  padding: 6px 0;
+}
+
+/* dropdown item-ները հիմա <button> են AdminDashboard.js-ի մեջ */
+.list-menu-item{
+  width:100%;
+  text-align:left;
+
+  background: transparent;
+  border:0;
+  outline:0;
+  appearance:none;
+
+  padding: 12px 14px;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  font-size: 15px;
+  line-height: 1.4;
+  color:#111;
+  display:block;
+}
+
+.list-menu-item + .list-menu-item{
+  border-top: 1px solid #eee;
+}
+
+.list-menu-item:hover{
+  background:#f5f6f8;
+}
+
+/* click-outside թափանցիկ շերտը, որ փակենք popup-ը */
+.menu-backdrop{
+  position:absolute;
+  inset:0;
+  z-index:20;
+  background: transparent;
+}
+
+
+/* քարտեր և input-ներ — DARK default */
+.card{
+  background:rgba(255,255,255,.03);
+  border-radius:16px;
+  padding:5px;
+  margin-bottom:30px;
+  color:inherit;
+}
+
+.input,
+.btn{
+  width:100%;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.14);
+  background:#0c1218;
+  color:var(--text);
+  outline:none;
+  font-size:14px;
+  line-height:1.4;
+}
+
+.input{
+  margin-bottom:10px;
+}
+.btn{
+  cursor:pointer;
+  font-weight:600;
+  text-align:center;
+  margin-top: 10px;
+}
+
+.row{
+  display:flex;
+  gap:10px;
+}
+
+.small{
+  opacity:.85;
+  font-size:12px;
+  line-height:1.4;
+  color:inherit;
+}
+
+/* աղյուսակ — DARK */
+.table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:14px;
+  color:inherit;
+}
+.table th,
+.table td{
+  border-bottom:1px solid rgba(255,255,255,.08);
+  padding:8px 6px;
+  text-align:left;
+  vertical-align:top;
+}
+
+/* ===== LIGHT overrides for FORM stuff ===== */
+.screen.light .card{
+  background:transparent;
+  padding:12px;
+  margin-bottom:30px;
+  color:#111;
+}
+
+.screen.light .input,
+.screen.light .btn{
+  border:1px solid #d1d5db;
+  background:#ffffff;
+  color:#111;
+}
+
+.screen.light .btn{
+  background:#111;      /* Save button dark */
+  color:#fff;
+  border-color:#111;
+}
+
+.screen.light .table{
+  color:#111;
+}
+.screen.light .table th,
+.screen.light .table td{
+  border-bottom:1px solid #e5e7eb;
+  color:#111;
+}
+.screen.light .small{
+  color:#111;
+  opacity:.8;
+}
+
+
+
+/* լեզվի chip-եր  */
+.lang-chip-row{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+.chip{
+  border:1px solid #e5e7eb;
+  background:#fff;
+  color:#111;
+  padding:6px 10px;
+  border-radius:999px;
+  font-weight:800;
+  letter-spacing:.4px;
+  cursor:pointer;
+  box-shadow:0 1px 2px rgba(17,17,17,.05);
+  font-size:13px;
+  line-height:1.2;
+}
+.chip.active{
+  outline:2px solid #111;
+  outline-offset:0;
+}
+
+/* HERO (avatar/logo + name + desc) */
+.hero{
+  position:relative;
+  border-radius:16px;
+  overflow:hidden;
+  background:#ffffff;
+  color:#111;
+  box-shadow:0 2px 8px rgba(17,17,17,.06);
+  margin-bottom:16px;
+}
+.hero.has-cover{
+  background:#ffffff;
+}
+
+.hero-cover{
+  position:absolute;
+  inset:0 0 auto 0;
+  height:190px;
+  background-size:cover;
+  background-position:center;
+  filter:saturate(0.95) contrast(1.02);
+}
+
+.hero-card-id{
+  font-weight:800;
+  letter-spacing:.4px;
+}
+
+.hero-body{
+  position:relative;
+  z-index:1;
+  padding:10px 16px 18px;
+  margin-top:110px; /* cover-ից հետո իջնում ենք ներքև */
+}
+
+.hero-logo{
+  width:104px;
+  height:104px;
+  object-fit:cover;
+  border-radius:50%;
+  display:block;
+  margin:0 auto 12px auto;
+  box-shadow:0 6px 16px rgba(0,0,0,.18);
+}
+
+.hero-title{
+  font-size:22px;
+  line-height:1.25;
+  text-align:center;
+  margin:0 0 10px 0;
+  font-weight:900;
+  letter-spacing:.6px;
+  text-transform:uppercase;
+  color:inherit;
+}
+
+.hero-desc{
+  margin: 15px auto 0;
+  max-width: 90%;
+  font-size: 15.5px;
+  line-height: 1.6;
+  text-align: justify;
+  text-justify: inter-word;
+
+  overflow-wrap: break-word;
+  word-break: normal;
+
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  -ms-hyphens: auto;
+
+  opacity: .9;
+  font-weight: 700;
+  text-align-last: left;
+  color:inherit;
+}
+
+/* icons grid */
+.icons-grid-wrap{
+  margin-top:10px;
+}
+.icons-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
+  padding:0 6px 14px 6px;
+}
+.icon-btn{
+  display:grid;
+  gap:8px;
+  justify-items:center;
+  text-decoration:none;
+  color:#111;
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-radius:16px;
+  padding:14px 8px;
+  box-shadow:0 1px 2px rgba(17,17,17,.05);
+  font-size:13px;
+  line-height:1.3;
+  font-weight:600;
+}
+.icon-btn:hover{
+  background:#f8fafc;
+}
+.icon-dot{
+  width:42px;
+  height:42px;
+  border-radius:12px;
+  border:1px solid #e5e7eb;
+  box-shadow: inset 0 1px 2px rgba(17,17,17,.04);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+}
+.icon-label{
+  font-size:12px;
+  font-weight:700;
+  text-align:center;
+  color:#111;
+}
+
+div section{
+  margin: 20px 0;
+}
+
+/* form դաշտերի որոշ utility-ներ (admin էջից) */
+.text-sm{
+  margin-bottom: 15px;
+  width: 150px;
+  font-size:13px;
+  line-height:1.3;
+  font-weight:500;
+  color:inherit;
+}
+.mb-3{
+  height: 80px;
+  margin-bottom: 30px;
+}
+.mb-4{
+  margin-top: 20px;
+}
+
+#uploadImg {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  gap: 0;
+}
+
+#uploadImg label {
+  width: 100px;
+}
+
+#uploadImg input {
+  width: 100px;
+}
+
+#uploadImg button {
+  padding: 3px 7px;
+  height: 45px;
+  width: 120px;
+  font-size: 14px;
+}
+
+.input{
+  margin-bottom: 10px;
+}
+
+#companyNameColor  {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;  
+}
+
+#companyNameColor div {
+  width: 250px;
+}
+
+#descriptionColor {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+#descriptionColor label {
+  width: 250px;
+}
+
+#selectOurBackground {
+  display: flex;
+  flex-direction: column;
+}
+
+.share-icon-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+#publicScroll::-webkit-scrollbar {
+  display: none;
+}
+
+
+/* ====== 480px և ներքև – phone full screen ====== */
+@media (max-width: 480px) {
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    display: block;          
+    background: #000;        
+  }
+
+  .phone {
+    width: 100vw;
+    height: 100vh;
+    max-width: 100vw;
+    max-height: 100vh;
+    padding: 0;              /* որ լրիվ եզրից եզր լինի */
+    border-radius: 0;        /* corners-ը հավասարվում էկրանի եզրին */
+    box-shadow: none;        /* դուրսի shadow-ը պետք չի mobile full screen-ի վրա */
+  }
+
+  .screen {
+    width: 100%;
+    height: 100%;
+    border-radius: 0;        /* ամբողջ content-ը էլի full screen */
+  }
+}
+
+/* ====== 320px և ներքև – մի քիչ փոքրացնենք ամեն ինչ ====== */
+@media (max-width: 320px) {
+  .header .title {
+    margin: 10px 18px 0 18px;
+    font-size: 12px;
+  }
+
+  .btn-ghost {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .hero-body {
+    padding: 8px 12px 14px;
+    margin-top: 96px;
+  }
+
+  .hero-logo {
+    width: 88px;
+    height: 88px;
+    margin-bottom: 10px;
+  }
+
+  .hero-title {
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+
+  .hero-desc {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .icons-grid {
+    gap: 10px;
+    padding: 0 4px 10px 4px;
+  }
+
+  .icon-btn {
+    padding: 10px 6px;
+    border-radius: 14px;
+    font-size: 12px;
+  }
+
+  .icon-dot {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+
+  .icon-label {
+    font-size: 11px;
+  }
+}
+
+/* ====== 280px և ներքև – ամենափոքր տարբերակը Galaxy Fold-ի համար ====== */
+@media (max-width: 280px) {
+  .header .title {
+    margin: 8px 14px 0 14px;
+    font-size: 11px;
+  }
+
+  .btn-ghost {
+    padding: 5px 8px;
+    font-size: 11px;
+  }
+
+  .hero-body {
+    padding: 6px 10px 12px;
+    margin-top: 88px;
+  }
+
+  .hero-logo {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 8px;
+  }
+
+  .hero-title {
+    font-size: 16px;
+  }
+
+  .hero-desc {
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  .icons-grid {
+    gap: 8px;
+    padding: 0 2px 8px 2px;
+  }
+
+  .icon-btn {
+    padding: 8px 4px;
+    border-radius: 12px;
+    font-size: 11px;
+  }
+
+  .icon-dot {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+  .icon-label {
+    font-size: 10px;
+  }
+}
+
+
+#avatarUpload {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  height: 150px;
+}
+
+#avatarUpload img {
+  height: 100px;
+}
+
+#text {
+  margin-top: 20px;
+}
+
+#shareFirstText {
+  margin: 30px 0;
+  height: 20px;
+}
+
+#offlineQRText {
+  margin: 30px 0;
+  height: 30px;
+}
+
+#passwordCardBlock {
+  height: 450px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+#passwordCardBlock label {
+  margin: 0;
+}
+
+#passwordText {
+  margin-top: 210px;
+}
+
+#firstPasswordBlock {
+  margin: 0;
+}
+
+
+.controls .i18n-vertical > .i18n-item:nth-child(-n + 2) > input {
+  width: 340px;
+}
+

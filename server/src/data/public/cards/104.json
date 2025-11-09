@@ -1,0 +1,44 @@
+{
+  "card_id": 104,
+  "updated_at": "2025-11-06T15:48:32.898Z",
+  "information": {
+    "avatar": {
+      "type": "image",
+      "imageUrl": "/file/1762444108512-huzu9xea9if.png",
+      "videoUrl": ""
+    },
+    "company": {
+      "name": {
+        "am": "sd",
+        "ar": "",
+        "en": "",
+        "fr": "",
+        "ru": ""
+      },
+      "nameColor": "#000000"
+    },
+    "logo_url": "/file/1762444108512-huzu9xea9if.png",
+    "background": {
+      "type": "color",
+      "color": "#ffffff",
+      "imageUrl": "",
+      "videoUrl": ""
+    },
+    "description": {
+      "am": "",
+      "ar": "",
+      "en": "",
+      "fr": "",
+      "ru": "",
+      "color": "#000000"
+    },
+    "default_lang": "am",
+    "available_langs": [
+      "am",
+      "ru",
+      "en",
+      "ar",
+      "fr"
+    ]
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "card_id": 103,
+  "updated_at": "2025-10-26T10:15:00.198Z",
+  "information": {
+    "company": {
+      "name": {
+        "am": "Syuzanna Ohanyan",
+        "ar": "",
+        "en": "",
+        "fr": "",
+        "ru": ""
+      },
+      "nameColor": "#000000"
+    },
+    "logo_url": "/file/1761470829954-tqxs3i1ao79.jpg",
+    "background": {
+      "type": "color",
+      "color": "#ffffff",
+      "imageUrl": "",
+      "videoUrl": ""
+    },
+    "description": {
+      "am": "jksdfavblufcalhcvlf",
+      "ar": "",
+      "en": "",
+      "fr": "",
+      "ru": "",
+      "color": "#000000"
+    }
+  }
+}

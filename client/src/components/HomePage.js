@@ -1,14 +1,27 @@
 // client/src/components/HomePage.js
 import React from "react";
-import { getPublicInfoByCardId, API } from "../api.js"; // ⬅️ API-ն էլ ենք բերում
+import { getPublicInfoByCardId, API } from "../api.js";
 import "./Responcive.css";
 
-import IconsPage     from "./IconsPage.js";
-import BrandsPage    from "./BrandsPage.js";
+import IconsPage from "./IconsPage.js";
+import BrandsPage from "./BrandsPage.js";
 import BrandInfoPage from "./BrandInfoPage.js";
-import SharePage     from "./SharePage.js";
+import SharePage from "./SharePage.js";
 
 const h = React.createElement;
+
+/* ------------ API origin (Render) ------------ */
+const API_ORIGIN = (() => {
+  try {
+    // օրինակ: API = "https://khcontactum.onrender.com"
+    const url = new URL(API);
+    return url.origin; // "https://khcontactum.onrender.com"
+  } catch {
+    // fallback, եթե ինչ–որ բան սխալ լինի
+    if (typeof window !== "undefined") return window.location.origin;
+    return "http://localhost:5050";
+  }
+})();
 
 /* ------------ utils ------------ */
 function absSrc(u = "") {
@@ -16,17 +29,9 @@ function absSrc(u = "") {
   // արդեն absolute կամ blob/data URL է
   if (/^(data:|https?:\/\/|blob:)/i.test(u)) return u;
 
-  // ապահով դարձնենք, որ path-ը սկսվի '/'-ով
   const path = u.startsWith("/") ? u : "/" + u;
-
-  // օգտագործում ենք API base-ը, որ աշխատի և localhost-ում, և Render-ում
-  try {
-    const apiUrl = new URL(API);        // напр. https://khcontactum.onrender.com
-    return `${apiUrl.origin}${path}`;   // 👉 https://khcontactum.onrender.com/file/....
-  } catch {
-    // fallback — relative URL, եթե ինչ-որ պատճառով API-ն invalid է
-    return path;
-  }
+  // օգտագործում ենք backend-ի origin-ը, ոչ թե http://host:5050
+  return `${API_ORIGIN}${path}`;
 }
 
 function isVideo(u = "") {
@@ -338,7 +343,8 @@ export default function HomePage({ cardId = "101" }) {
   };
 
   const nameColor = info?.company?.nameColor || "#111";
-  const descColor = info?.description?.color || info?.profile?.aboutColor || "#666";
+  const descColor =
+    info?.description?.color || info?.profile?.aboutColor || "#666";
 
   let avatarUrl = "";
   const avTop = info?.avatar;
@@ -402,7 +408,8 @@ export default function HomePage({ cardId = "101" }) {
   const brandsArray = Array.isArray(info?.brands) ? info.brands : [];
   const brandsCols = Number(info?.brandsCols || 3);
   const brandsTitleColor = info?.brandsTitleColor || "#000000";
-  const brandsTitleText = info?.brandsTitleText || "ՄԵՐ ԲՐԵՆԴՆԵՐԸ";
+  const brandsTitleText =
+    info?.brandsTitleText || "ՄԵՐ ԲՐԵՆԴՆԵՐԸ";
   const brandsBgColor = info?.brandsBgColor || "#ffffff";
 
   const brandInfos = Array.isArray(info?.brandInfos) ? info.brandInfos : [];

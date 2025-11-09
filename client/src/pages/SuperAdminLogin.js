@@ -6,17 +6,16 @@ import { superLogin } from "../api.js";
 const h = React.createElement;
 
 export default function SuperAdminLogin({ onSuccess }) {
+  // username-ի default արժեքը կարող ես փոխել ինչպես ուզում ես
   const [u, setU] = useState("ArmKHCon");
   const [p, setP] = useState("");
   const [otp, setOtp] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [err, setErr] = useState("");
-  const [loading, setLoading] = useState(false);
 
   async function submit(e) {
     e.preventDefault();
     setErr("");
-    setLoading(true);
 
     const username = u.trim();
     const password = p;
@@ -24,28 +23,15 @@ export default function SuperAdminLogin({ onSuccess }) {
 
     if (!username || !password || !code) {
       setErr("username, password և otp դաշտերը պարտադիր են");
-      setLoading(false);
       return;
     }
 
     try {
-      // ⛔️ Նախընտրելի տարբերակ՝ ապահով ստուգում
-      const result = await superLogin(username, password, code);
-
-      // Եթե login-ը սխալ է՝ null կամ դատարկ պատասխան
-      if (!result || !result.token) {
-        setErr(result?.message || "Մուտք գործելու սխալ տվյալներ կամ սերվերային սխալ");
-        setLoading(false);
-        return;
-      }
-
-      // ✅ Եթե ամեն ինչ նորմալ է՝ փոխանցում ենք token-ը
-      onSuccess(result.token);
+      // ✅ ուղարկում ենք նաև otp
+      const { token } = await superLogin(username, password, code);
+      onSuccess(token); // sessionStorage-ով աշխատում է App.js-ից
     } catch (e2) {
-      console.error("SuperAdmin login error:", e2);
-      setErr(e2.message || "Server connection error");
-    } finally {
-      setLoading(false);
+      setErr(e2.message || "Bad creds");
     }
   }
 
@@ -108,19 +94,16 @@ export default function SuperAdminLogin({ onSuccess }) {
         autoComplete: "one-time-code",
       }),
 
-      // Submit button
       h(
         "button",
         {
           className: "btn",
           type: "submit",
-          disabled: loading,
-          style: { marginTop: 10, opacity: loading ? 0.6 : 1 },
+          style: { marginTop: 10 },
         },
-        loading ? "Loading..." : "Login"
+        "Login"
       ),
 
-      // Error block
       err &&
         h(
           "div",

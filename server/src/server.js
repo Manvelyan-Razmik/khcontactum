@@ -4,6 +4,7 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
+import compression from "compression";
 
 import publicRoutes from "./routes/public.js";
 import superadminRoutes from "./routes/superadmin.js";
@@ -42,6 +43,7 @@ const TRUST_PROXY_ENABLED = process.env.TRUST_PROXY === "1";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const DATA_DIR = path.join(__dirname, "../data");
+const CLIENT_DIST = path.join(__dirname, "../../client/dist");
 
 /* ================== DB CHECK ================== */
 
@@ -59,6 +61,9 @@ const DATA_DIR = path.join(__dirname, "../data");
 
 // ✅ իրական client IP-ների համար (Nginx / Cloudflare / Render proxy)
 app.set("trust proxy", TRUST_PROXY_ENABLED ? 1 : 0);
+
+// gzip compression — փոքր response-ներ, արագ բեռնում
+app.use(compression());
 
 /* ✅ Helmet — թույլ ենք տալիս cross-origin resources (նկար, video)
    որ կարողանաս օգտագործել դրանք front-end-ում */
@@ -138,6 +143,7 @@ app.use(
   "/file",
   (req, res, next) => {
     res.setHeader("Accept-Ranges", "bytes");
+    // Cache 7 օր + immutable (յուրաքանչյուր նոր upload՝ նոր URL)
     res.setHeader("Cache-Control", "public, max-age=604800, immutable");
     next();
   },
@@ -147,6 +153,18 @@ app.use(
 /* ================== API 404 ================== */
 
 app.use("/api", (_req, res) => res.status(404).json({ error: "Not Found" }));
+
+/* ================== REACT BUILD (PRODUCTION) ================== */
+
+if (process.env.NODE_ENV === "production") {
+  // Serve client build (Vite)՝ client/dist-ից
+  app.use(express.static(CLIENT_DIST));
+
+  // SPA fallback — React Router-ի բոլոր ուղիների համար
+  app.get("*", (_req, res) => {
+    res.sendFile(path.join(CLIENT_DIST, "index.html"));
+  });
+}
 
 /* ================== START SERVER ================== */
 

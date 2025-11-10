@@ -16,12 +16,19 @@ function absSrc(u = "") {
   // absolute / data / blob
   if (/^(data:|https?:\/\/|blob:)/i.test(u)) return u;
 
-  const path = u.startsWith("/") ? u : "/" + u;
+  // հին "server/..." ձևաչափի support
+  let path = String(u).trim().replace(/^server\//i, "");
+  if (!path.startsWith("/")) path = "/" + path;
 
   try {
-    const apiUrl = new URL(API);        // напр. https://khcontactum.onrender.com
-    return `${apiUrl.origin}${path}`;   // https://khcontactum.onrender.com/file/...
-  } catch {
+    // напр. https://khcontactum.onrender.com
+    const apiUrl = new URL(API);
+    return `${apiUrl.origin}${path}`;
+  } catch (e) {
+    console.warn("absSrc: bad API, fallback to window.origin", API, e);
+    if (typeof window !== "undefined" && window.location?.origin) {
+      return window.location.origin.replace(/\/$/, "") + path;
+    }
     return path;
   }
 }
@@ -297,6 +304,7 @@ export default function HomePage({ cardId = "101" }) {
           }
         }
       } catch (e) {
+        console.error("HomePage fetch error", e);
         if (!killed) setErr(e.message || "Error");
       } finally {
         if (!killed) setLoading(false);
@@ -311,284 +319,310 @@ export default function HomePage({ cardId = "101" }) {
   if (err) return h("div", { className: "pad" }, "Սխալ: " + err);
   if (!info) return h("div", { className: "pad" }, "Տվյալ չկա");
 
-  const serverLangs =
-    Array.isArray(info?.available_langs) && info.available_langs.length
-      ? info.available_langs.slice(0, 5)
-      : ["am", "ru", "en", "ar", "fr"];
+  // -------- SAFE RENDER WRAPPER --------
+  try {
+    const serverLangs =
+      Array.isArray(info?.available_langs) && info.available_langs.length
+        ? info.available_langs.slice(0, 5)
+        : ["am", "ru", "en", "ar", "fr"];
 
-  const nameByLang = {
-    am: info?.company?.name?.am || "",
-    ru: info?.company?.name?.ru || "",
-    en: info?.company?.name?.en || "",
-    ar: info?.company?.name?.ar || "",
-    fr: info?.company?.name?.fr || "",
-  };
-
-  const desc = info?.description || {};
-  const about = info?.profile?.about || {};
-  const textByLang = {
-    am: (desc?.am ?? about?.am) || "",
-    ru: (desc?.ru ?? about?.ru) || "",
-    en: (desc?.en ?? about?.en) || "",
-    ar: (desc?.ar ?? about?.ar) || "",
-    fr: (desc?.fr ?? about?.fr) || "",
-  };
-
-  const nameColor =
-    info?.company?.nameColor || "#111";
-  const descColor =
-    info?.description?.color || info?.profile?.aboutColor || "#666";
-
-  /* ---------- avatar selection (type-aware) ---------- */
-  let avatarUrl = "";
-  let avatarType = "";
-  const avTop = info?.avatar;
-
-  if (avTop && typeof avTop === "object") {
-    avatarType = avTop.type || "";
-    if (avatarType === "image") {
-      avatarUrl = avTop.imageUrl || avTop.videoUrl || "";
-    } else if (avatarType === "video") {
-      avatarUrl = avTop.videoUrl || avTop.imageUrl || "";
-    } else {
-      // fallback — հին տվյալների համար
-      avatarUrl = avTop.videoUrl || avTop.imageUrl || "";
-    }
-  } else if (typeof avTop === "string") {
-    avatarUrl = avTop;
-  } else {
-    const avProf = info?.profile?.avatar;
-    avatarUrl =
-      typeof avProf === "object"
-        ? avProf.videoUrl || avProf.imageUrl || ""
-        : avProf || info?.assets?.logo_url || info?.logo_url || "";
-  }
-
-  const avatarAbs = absSrc(avatarUrl);
-  const avatarIsVideo =
-    avatarType === "video"
-      ? true
-      : avatarType === "image"
-      ? false
-      : isVideo(avatarAbs);
-
-  /* ---------- background ---------- */
-  const bg =
-    info?.background || {
-      type: "color",
-      color: "#ffffff",
-      imageUrl: "",
-      videoUrl: "",
+    const nameByLang = {
+      am: info?.company?.name?.am || "",
+      ru: info?.company?.name?.ru || "",
+      en: info?.company?.name?.en || "",
+      ar: info?.company?.name?.ar || "",
+      fr: info?.company?.name?.fr || "",
     };
 
-  const name =
-    nameByLang[lang] || nameByLang.am || nameByLang.en || "—";
-  const descriptionRaw = textByLang[lang] || "";
-  const description = softHyphenate(descriptionRaw, 6);
+    const desc = info?.description || {};
+    const about = info?.profile?.about || {};
+    const textByLang = {
+      am: (desc?.am ?? about?.am) || "",
+      ru: (desc?.ru ?? about?.ru) || "",
+      en: (desc?.en ?? about?.en) || "",
+      ar: (desc?.ar ?? about?.ar) || "",
+      fr: (desc?.fr ?? about?.fr) || "",
+    };
 
-  const colsInfo = idealColsForLang(lang);
-  const minCh = colsInfo[0];
-  const maxCh = colsInfo[1];
+    const nameColor = info?.company?.nameColor || "#111";
+    const descColor =
+      info?.description?.color || info?.profile?.aboutColor || "#666";
 
-  const descStyle = {
-    color: descColor,
-    margin: "15px auto 0",
-    lineHeight: 1.6,
-    maxWidth: "clamp(" + minCh + "ch, 90%, " + maxCh + "ch)",
-    textAlign: "justify",
-    textJustify: "inter-word",
-    overflowWrap: "break-word",
-    hyphens: "auto",
-    textWrap: "pretty",
-    textAlignLast: "left",
-  };
+    /* ---------- avatar selection (type-aware + fallbacks) ---------- */
+    const avTop = info?.avatar;
+    const avProf = info?.profile?.avatar;
 
-  const icons = info?.icons || {};
-  const links = Array.isArray(icons.links) ? icons.links : [];
-  const styles = icons?.styles || {};
+    const companyLogo =
+      info?.company?.logoUrl ||
+      info?.company?.logo_url ||
+      (typeof info?.company?.logo === "string"
+        ? info.company.logo
+        : info?.company?.logo?.imageUrl || "");
 
-  const labelColor = styles.labelCss || styles.labelHEX || "";
-  const chipColor = styles.chipCss || rgbaToCss(styles.chipRGBA) || "";
-  const rowCardColor =
-    styles.rowCardCss || rgbaToCss(styles.rowCardRGBA) || "";
-  const layoutStyle = styles.layoutStyle || "dzev1";
-  const cols = Number(styles.cols || 4);
-  const glowEnabled = !!styles.glowEnabled;
-  const glowColor = styles.glowColor || "#7dd3fc";
+    const fallbackLogo =
+      info?.assets?.logo_url || info?.logo_url || companyLogo || "";
 
-  const brandsArray = Array.isArray(info?.brands) ? info.brands : [];
-  const brandsCols = Number(info?.brandsCols || 3);
-  const brandsTitleColor = info?.brandsTitleColor || "#000000";
-  const brandsTitleText = info?.brandsTitleText || "ՄԵՐ ԲՐԵՆԴՆԵՐԸ";
-  const brandsBgColor = info?.brandsBgColor || "#ffffff";
-  const brandsNameColor = info?.brandsNameColor || "#000000"; // ✅ բերել է առաջին կոդից
+    let avatarUrl = "";
+    let avatarType = "";
 
-  const brandInfos = Array.isArray(info?.brandInfos) ? info.brandInfos : [];
-  const showBrandInfo = !!activeBrandKeyword;
+    if (typeof avTop === "string") {
+      avatarUrl = avTop;
+    } else if (avTop && typeof avTop === "object") {
+      avatarType = avTop.type || "";
+      if (avatarType === "image") {
+        avatarUrl = avTop.imageUrl || avTop.videoUrl || "";
+      } else if (avatarType === "video") {
+        avatarUrl = avTop.videoUrl || avTop.imageUrl || "";
+      } else {
+        avatarUrl = avTop.imageUrl || avTop.videoUrl || "";
+      }
+    }
 
-  return h(
-    "div",
-    {
-      className: "public-home",
-      style: {
-        position: "relative",
-        width: "100%",
-        height: "100%",
-        minHeight: "100%",
-        overflow: "hidden",
-      },
-    },
+    if (!avatarUrl && avProf) {
+      if (typeof avProf === "string") {
+        avatarUrl = avProf;
+      } else if (typeof avProf === "object") {
+        avatarUrl = avProf.imageUrl || avProf.videoUrl || "";
+      }
+    }
 
-    /* background layer */
-    h(
+    if (!avatarUrl && fallbackLogo) {
+      avatarUrl = fallbackLogo;
+    }
+
+    const avatarAbs = absSrc(avatarUrl);
+    const avatarIsVideo =
+      avatarType === "video"
+        ? true
+        : avatarType === "image"
+        ? false
+        : isVideo(avatarAbs);
+
+    /* ---------- background ---------- */
+    const bg =
+      info?.background || {
+        type: "color",
+        color: "#ffffff",
+        imageUrl: "",
+        videoUrl: "",
+      };
+
+    const name =
+      nameByLang[lang] || nameByLang.am || nameByLang.en || "—";
+    const descriptionRaw = textByLang[lang] || "";
+    const description = softHyphenate(descriptionRaw, 6);
+
+    const colsInfo = idealColsForLang(lang);
+    const minCh = colsInfo[0];
+    const maxCh = colsInfo[1];
+
+    const descStyle = {
+      color: descColor,
+      margin: "15px auto 0",
+      lineHeight: 1.6,
+      maxWidth: "clamp(" + minCh + "ch, 90%, " + maxCh + "ch)",
+      textAlign: "justify",
+      textJustify: "inter-word",
+      overflowWrap: "break-word",
+      hyphens: "auto",
+      textWrap: "pretty",
+      textAlignLast: "left",
+    };
+
+    const icons = info?.icons || {};
+    const links = Array.isArray(icons.links) ? icons.links : [];
+    const styles = icons?.styles || {};
+
+    const labelColor = styles.labelCss || styles.labelHEX || "";
+    const chipColor = styles.chipCss || rgbaToCss(styles.chipRGBA) || "";
+    const rowCardColor =
+      styles.rowCardCss || rgbaToCss(styles.rowCardRGBA) || "";
+    const layoutStyle = styles.layoutStyle || "dzev1";
+    const cols = Number(styles.cols || 4);
+    const glowEnabled = !!styles.glowEnabled;
+    const glowColor = styles.glowColor || "#7dd3fc";
+
+    const brandsArray = Array.isArray(info?.brands) ? info.brands : [];
+    const brandsCols = Number(info?.brandsCols || 3);
+    const brandsTitleColor = info?.brandsTitleColor || "#000000";
+    const brandsTitleText = info?.brandsTitleText || "ՄԵՐ ԲՐԵՆԴՆԵՐԸ";
+    const brandsBgColor = info?.brandsBgColor || "#ffffff";
+    const brandsNameColor = info?.brandsNameColor || "#000000";
+
+    const brandInfos = Array.isArray(info?.brandInfos) ? info.brandInfos : [];
+    const showBrandInfo = !!activeBrandKeyword;
+
+    return h(
       "div",
       {
-        className: "public-bg-layer",
-        style: {
-          position: "absolute",
-          inset: 0,
-          zIndex: 0,
-          pointerEvents: "none",
-          overflow: "hidden",
-          background:
-            bg.type === "color"
-              ? bg.color || "#ffffff"
-              : bg.type === "image"
-              ? `url(${absSrc(bg.imageUrl)}) center/cover no-repeat`
-              : "transparent",
-        },
-      },
-      bg.type === "video" && bg.videoUrl
-        ? h("video", {
-            src: absSrc(bg.videoUrl),
-            muted: true,
-            playsInline: true,
-            loop: true,
-            autoPlay: true,
-            preload: "auto",
-            disableRemotePlayback: true,
-            style: {
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-            },
-          })
-        : null
-    ),
-
-    /* scroll layer */
-    h(
-      "div",
-      {
-        className: "public-scroll-layer",
-        id: "publicScroll",
+        className: "public-home",
         style: {
           position: "relative",
-          zIndex: 1,
           width: "100%",
           height: "100%",
-          maxHeight: "100%",
-          overflowY: "auto",
-          WebkitOverflowScrolling: "touch",
-          padding: "12px",
+          minHeight: "100%",
+          overflow: "hidden",
         },
       },
 
-      h(LangDropdown, {
-        value: lang,
-        onChange: setLang,
-        langs: serverLangs,
-      }),
-
-      showBrandInfo
-        ? h(BrandInfoPage, {
-            brandInfos,
-            keyword: activeBrandKeyword,
-            lang,
-            onBack: () => setActiveBrandKeyword(""),
-          })
-        : h(
-            "div",
-            { style: { position: "relative" } },
-
-            /* HERO CARD */
-            h(
-              "section",
-              {
-                className: "card",
-                style: {
-                  textAlign: "center",
-                  paddingTop: 10,
-                  paddingBottom: 18,
-                },
+      /* background layer */
+      h(
+        "div",
+        {
+          className: "public-bg-layer",
+          style: {
+            position: "absolute",
+            inset: 0,
+            zIndex: 0,
+            pointerEvents: "none",
+            overflow: "hidden",
+            background:
+              bg.type === "color"
+                ? bg.color || "#ffffff"
+                : bg.type === "image"
+                ? `url(${absSrc(bg.imageUrl)}) center/cover no-repeat`
+                : "transparent",
+          },
+        },
+        bg.type === "video" && bg.videoUrl
+          ? h("video", {
+              src: absSrc(bg.videoUrl),
+              muted: true,
+              playsInline: true,
+              loop: true,
+              autoPlay: true,
+              preload: "auto",
+              disableRemotePlayback: true,
+              style: {
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
               },
-              h(AvatarMedia, {
-                src: avatarAbs,
-                isVideo: avatarIsVideo,
-                initials: (name || "KH").slice(0, 2),
-              }),
+            })
+          : null
+      ),
 
+      /* scroll layer */
+      h(
+        "div",
+        {
+          className: "public-scroll-layer",
+          id: "publicScroll",
+          style: {
+            position: "relative",
+            zIndex: 1,
+            width: "100%",
+            height: "100%",
+            maxHeight: "100%",
+            overflowY: "auto",
+            WebkitOverflowScrolling: "touch",
+            padding: "12px",
+          },
+        },
+
+        h(LangDropdown, {
+          value: lang,
+          onChange: setLang,
+          langs: serverLangs,
+        }),
+
+        showBrandInfo
+          ? h(BrandInfoPage, {
+              brandInfos,
+              keyword: activeBrandKeyword,
+              lang,
+              onBack: () => setActiveBrandKeyword(""),
+            })
+          : h(
+              "div",
+              { style: { position: "relative" } },
+
+              /* HERO CARD */
               h(
-                "h1",
+                "section",
                 {
-                  className: "hero-title",
+                  className: "card",
                   style: {
-                    color: nameColor,
-                    margin: "15px 0 4px",
-                    fontSize: 35,
-                    textShadow: "0 0 4px rgba(255,255,255,0.6)",
+                    textAlign: "center",
+                    paddingTop: 10,
+                    paddingBottom: 18,
                   },
                 },
-                name
+                h(AvatarMedia, {
+                  src: avatarAbs,
+                  isVideo: avatarIsVideo,
+                  initials: (name || "KH").slice(0, 2),
+                }),
+
+                h(
+                  "h1",
+                  {
+                    className: "hero-title",
+                    style: {
+                      color: nameColor,
+                      margin: "15px 0 4px",
+                      fontSize: 35,
+                      textShadow: "0 0 4px rgba(255,255,255,0.6)",
+                    },
+                  },
+                  name
+                ),
+
+                h(
+                  "p",
+                  {
+                    className: "hero-desc",
+                    style: {
+                      ...descStyle,
+                      textShadow: "0 0 4px rgba(255,255,255,0.7)",
+                    },
+                    lang,
+                    dir: lang === "ar" ? "rtl" : "ltr",
+                  },
+                  description
+                )
               ),
 
-              h(
-                "p",
-                {
-                  className: "hero-desc",
-                  style: {
-                    ...descStyle,
-                    textShadow: "0 0 4px rgba(255,255,255,0.7)",
-                  },
-                  lang,
-                  dir: lang === "ar" ? "rtl" : "ltr",
-                },
-                description
-              )
-            ),
+              /* ICONS BLOCK */
+              links.length
+                ? h(IconsPage, {
+                    links,
+                    labelColor,
+                    chipColor,
+                    rowCardColor,
+                    layoutStyle,
+                    cols,
+                    glowEnabled,
+                    glowColor,
+                    lang,
+                  })
+                : null,
 
-            /* ICONS BLOCK */
-            links.length
-              ? h(IconsPage, {
-                  links,
-                  labelColor,
-                  chipColor,
-                  rowCardColor,
-                  layoutStyle,
-                  cols,
-                  glowEnabled,
-                  glowColor,
-                  lang,
-                })
-              : null,
+              /* BRANDS BLOCK */
+              brandsArray.length
+                ? h(BrandsPage, {
+                    brands: brandsArray,
+                    brandsTitleColor,
+                    brandsTitleText,
+                    brandsCols,
+                    brandsBgColor,
+                    brandsNameColor,
+                    lang,
+                    onKeywordClick: (kw) => setActiveBrandKeyword(kw),
+                  })
+                : null,
 
-            /* BRANDS BLOCK */
-            brandsArray.length
-              ? h(BrandsPage, {
-                  brands: brandsArray,
-                  brandsTitleColor,
-                  brandsTitleText,
-                  brandsCols,
-                  brandsBgColor,
-                  brandsNameColor, // ✅ փոխանցում ենք BrandsPage-ին
-                  lang,
-                  onKeywordClick: (kw) => setActiveBrandKeyword(kw),
-                })
-              : null,
-
-            /* SHARE / QR BLOCK */
-            h(SharePage, { cardId, info, lang })
-          )
-    )
-  );
+              /* SHARE / QR BLOCK */
+              h(SharePage, { cardId, info, lang })
+            )
+      )
+    );
+  } catch (e) {
+    console.error("HomePage render error", e, { info });
+    return h(
+      "div",
+      { className: "pad" },
+      "Render error: " + (e.message || String(e))
+    );
+  }
 }

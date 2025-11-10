@@ -2,7 +2,6 @@
 import React from "react";
 import "./Responcive.css";
 
-
 // png icon-ներ
 import fbIcon    from "../img/face.png";
 import tgIcon    from "../img/tele.png";
@@ -17,7 +16,8 @@ const h = React.createElement;
 /* ===== i18n text ===== */
 const TEXT = {
   am: {
-    
+    qrTitle: "Իմ քարտի QR կոդը",
+    qrDesc: "Սկանավորեք QR կոդը՝ բացելու համար ձեր թվային վիզիտ քարտը։",
     scanBtn: "Սկանավորել QR կոդը",
     shareTitle: "Կիսվել իմ քարտով",
     addBtn: "ԱՎԵԼԱՑՐԵՔ ԻՆՁ ԿՈՆՏԱԿՏՆԵՐԻ ՑԱՆԿՈՒՄ",
@@ -26,7 +26,8 @@ const TEXT = {
     offlineNote: "Սկանելուց հետո կարող եք պահպանել կոնտակտի մեջ։",
   },
   ru: {
-    
+    qrTitle: "QR-код моей визитки",
+    qrDesc: "Отсканируйте QR-код, чтобы открыть вашу цифровую визитку.",
     scanBtn: "СКАНИРОВАТЬ QR-КОД",
     shareTitle: "ПОДЕЛИТЬСЯ МОЕЙ ВИЗИТКОЙ",
     addBtn: "ДОБАВИТЬ В КОНТАКТЫ",
@@ -35,7 +36,8 @@ const TEXT = {
     offlineNote: "После сканирования можно сохранить в контактах.",
   },
   en: {
-    
+    qrTitle: "QR code of my card",
+    qrDesc: "Scan the QR code to open your digital business card.",
     scanBtn: "SCAN QR CODE",
     shareTitle: "SHARE MY CARD",
     addBtn: "ADD ME TO THE CONTACT LIST",
@@ -44,7 +46,8 @@ const TEXT = {
     offlineNote: "After scanning you can save it to your contacts.",
   },
   ar: {
-    
+    qrTitle: "رمز QR لبطاقتي",
+    qrDesc: "امسح رمز QR لفتح بطاقتك الرقمية.",
     scanBtn: "مسح رمز QR",
     shareTitle: "مشاركة بطاقتي",
     addBtn: "إضافتي إلى قائمة جهات الاتصال",
@@ -53,7 +56,8 @@ const TEXT = {
     offlineNote: "بعد المسح يمكنك حفظه في جهات الاتصال.",
   },
   fr: {
-    
+    qrTitle: "QR code de ma carte",
+    qrDesc: "Scannez le QR code pour ouvrir votre carte de visite numérique.",
     scanBtn: "SCANNER LE QR CODE",
     shareTitle: "PARTAGER MA CARTE",
     addBtn: "M’AJOUTER À LA LISTE DE CONTACTS",
@@ -178,6 +182,7 @@ function ShareIcon({ kind, onClick }) {
     h("img", {
       src: meta.img,
       alt: meta.label,
+      loading: "lazy",                      // ⬅ lazy share icons
       style: {
         width: 36,
         height: 36,
@@ -441,6 +446,7 @@ export default function SharePage({ info, cardId, lang }) {
           h("img", {
             src: qrImgSrc,
             alt: "QR code",
+            loading: "lazy",                   // ⬅ lazy QR image
             style: { width: 260, height: 260, margin: "0 auto 8px" },
           }),
 

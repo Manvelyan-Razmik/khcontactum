@@ -1,23 +1,9 @@
 // client/src/components/BrandInfoPage.js
 import React from "react";
 import "./Responcive.css";
-
+import { fileUrl } from "../utils/fileUrl.js";
 
 const h = React.createElement;
-
-/* helpers */
-function filesBase() {
-  if (typeof window === "undefined") return "http://localhost:5050";
-  const host = window.location.hostname || "localhost";
-  return "http://" + host + ":5050";
-}
-function absSrc(u = "") {
-  if (!u) return "";
-  if (/^(data:|https?:\/\/|blob:)/i.test(u)) return u;
-  let s = String(u).trim();
-  if (!s.startsWith("/")) s = "/" + s;
-  return filesBase() + s;
-}
 
 function pickLang(v, lang, fallbacks = ["am","en","ru","ar","fr"]) {
   if (!v) return "";
@@ -75,9 +61,9 @@ function WorkerCard({ item, lang }) {
       ? item.slides
       : (Array.isArray(item.gallery) ? item.gallery : []);
 
-  const slides = slidesSource.map(absSrc).filter(Boolean).slice(0, 5);
+  const slides = slidesSource.map(fileUrl).filter(Boolean).slice(0, 5);
 
-  const avatarAbs = absSrc(item.avatar || "");
+  const avatarAbs = fileUrl(item.avatar || "");
 
   const [index, setIndex] = React.useState(0);
   const hasSlides = slides.length > 0;
@@ -217,6 +203,7 @@ function WorkerCard({ item, lang }) {
         ? h("img", {
             src: avatarAbs,
             alt: name || "worker",
+            loading: "lazy",                             // ⬅ lazy avatar
             style:{ width:"100%", height:"100%", objectFit:"cover" }
           })
         : h("span", {
@@ -269,6 +256,7 @@ function WorkerCard({ item, lang }) {
         currentSlide && h("img", {
           src: currentSlide,
           alt:"",
+          loading: "lazy",                               // ⬅ lazy slides
           style:{
             width:"100%",
             height:"100%",

@@ -142,6 +142,7 @@ export default function BrandsPage({
                 ? h("img", {
                     src: absLogo(b.logo),
                     alt: name || "brand",
+                    loading: "lazy",                           // ⬅ lazy logo
                     style: {
                       width: "100%",
                       height: "100%",
@@ -209,16 +210,16 @@ export default function BrandsPage({
       { style: { display: "flex", justifyContent: "center" } },
       h(
         "div",
-        {
-          className: "brands-grid",
-          style: {
-            display: "grid",
-            gap: 16,
-            justifyContent: "center",
-            gridTemplateColumns:
-              cols === 2 ? "repeat(2, 120px)" : "repeat(3, 110px)",
+          {
+            className: "brands-grid",
+            style: {
+              display: "grid",
+              gap: 16,
+              justifyContent: "center",
+              gridTemplateColumns:
+                cols === 2 ? "repeat(2, 120px)" : "repeat(3, 110px)",
+            },
           },
-        },
         ...brands.map((b, i) => {
           const name = pickLang(b?.name, lang);
           const href = (b?.href || "").trim();
@@ -242,7 +243,7 @@ export default function BrandsPage({
               key: i,
               href: isUrl ? href : "#",
               target: isUrl ? "_blank" : undefined,
-              rel: isUrl ? "noreferrer" : undefined,
+              rel: isUrl ? "noopener noreferrer" : undefined,
               className: "brand-card",
               onClick: handleClick,
               style: {
@@ -273,6 +274,7 @@ export default function BrandsPage({
                 ? h("img", {
                     src: absLogo(b.logo),
                     alt: name || "brand",
+                    loading: "lazy",                       // ⬅ lazy logo
                     style: {
                       width: "100%",
                       height: "100%",

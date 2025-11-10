@@ -215,7 +215,7 @@ function VideoLoop({ src, style }) {
     muted: true,
     playsInline: true,
     autoPlay: true,
-    preload: "auto",
+    preload: "metadata",       // ⬅ ավելի թեթև preload
     disableRemotePlayback: true,
     style,
   });
@@ -255,6 +255,7 @@ function AvatarMedia({ src, isVideo, initials }) {
       src,
       alt: "avatar",
       style: commonStyle,
+      loading: "lazy",        // ⬅ lazy load avatar image
     });
   }
 
@@ -491,7 +492,7 @@ export default function HomePage({ cardId = "101" }) {
               playsInline: true,
               loop: true,
               autoPlay: true,
-              preload: "auto",
+              preload: "metadata", // ⬅ ոչ auto
               disableRemotePlayback: true,
               style: {
                 width: "100%",

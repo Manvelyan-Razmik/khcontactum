@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import PhoneShell from "../PhoneShell.js";
 import { adminMe, adminGetInfo, adminSaveInfo, uploadFile } from "../api.js";
+import { fileUrl } from "../utils/fileUrl.js";
 
 import IconsTab from "./tabs/IconsTab.js";
 import BrandsTab from "./tabs/BrandsTab.js";
@@ -278,21 +279,6 @@ const ADMIN_UI_TEXT = {
     chooseFileLabel: "Choisir un файл",
   },
 };
-
-/* ---------- ABSOLUTE FILE URL HELPERS ---------- */
-function filesBase() {
-  if (typeof window === "undefined") return "http://localhost:5050";
-  const host = window.location.hostname || "localhost";
-  return `http://${host}:5050`;
-}
-function absSrc(u) {
-  if (!u) return "";
-  if (/^(data:|https?:\/\/|blob:)/i.test(u)) return u;
-  let clean = String(u).trim();
-  if (!clean.startsWith("/")) clean = "/" + clean;
-  return filesBase() + clean;
-}
-/* ------------------------------------------------ */
 
 const DEFAULT_INFO = {
   logo_url: "",
@@ -969,7 +955,7 @@ export default function AdminDashboard({ token: propToken, onLogout, uiLang = "e
             style: { display: "flex", alignItems: "center", gap: "10px" },
           },
           CirclePreview(
-            absSrc(avatarPreview || info?.avatar?.imageUrl || info.logo_url),
+            fileUrl(avatarPreview || info?.avatar?.imageUrl || info.logo_url),
             "image"
           ),
           input(
@@ -998,7 +984,7 @@ export default function AdminDashboard({ token: propToken, onLogout, uiLang = "e
             style: { display: "flex", alignItems: "center", gap: "12px" },
           },
           CirclePreview(
-            absSrc(avatarPreview || info?.avatar?.videoUrl || ""),
+            fileUrl(avatarPreview || info?.avatar?.videoUrl || ""),
             "video"
           ),
           input(
@@ -1035,7 +1021,6 @@ export default function AdminDashboard({ token: propToken, onLogout, uiLang = "e
         const extraProps =
           code === "ar" ? { dir: "rtl", placeholder } : { placeholder };
 
-        // ✅ key ավելացրած տարբերակ
         return h(
           React.Fragment,
           { key: code },
@@ -1084,7 +1069,6 @@ export default function AdminDashboard({ token: propToken, onLogout, uiLang = "e
         const extraProps =
           code === "ar" ? { dir: "rtl", placeholder } : { placeholder };
 
-        // ✅ key ավելացրած տարբերակ textarea-ի համար
         return h(
           React.Fragment,
           { key: code },
@@ -1104,7 +1088,7 @@ export default function AdminDashboard({ token: propToken, onLogout, uiLang = "e
           T.descriptionColorLabel,
           info?.description?.color || "#000000",
           (v) => setInfoPath("description.color", v),
-          { style: { maxWidth: 180} }
+          { style: { maxWidth: 180 } }
         ),
         h("input", {
           type: "color",
@@ -1117,7 +1101,7 @@ export default function AdminDashboard({ token: propToken, onLogout, uiLang = "e
       h("h3", { className: "title mb-2" }, T.backgroundTitle),
       h(
         "label",
-        { className: "block mb-3", id: "selectOurBackground"},
+        { className: "block mb-3", id: "selectOurBackground" },
         h("div", { className: "text-sm mb-1" }, T.typeLabel),
         h(
           "select",
@@ -1128,7 +1112,7 @@ export default function AdminDashboard({ token: propToken, onLogout, uiLang = "e
           },
           h("option", { value: "color" }, T.backgroundTypeColor),
           h("option", { value: "image" }, T.backgroundTypeImage),
-          h("option", { value: "video"  }, T.backgroundTypeVideo)
+          h("option", { value: "video" }, T.backgroundTypeVideo)
         )
       ),
 
@@ -1163,7 +1147,7 @@ export default function AdminDashboard({ token: propToken, onLogout, uiLang = "e
             },
           },
           CirclePreview(
-            absSrc(bgImagePreview || info?.background?.imageUrl || ""),
+            fileUrl(bgImagePreview || info?.background?.imageUrl || ""),
             "image"
           ),
           input(
@@ -1183,12 +1167,12 @@ export default function AdminDashboard({ token: propToken, onLogout, uiLang = "e
       info?.background?.type === "video" &&
         h(
           "div",
-          {
-            className: "row mb-3",
-            style: { display: "flex", alignItems: "center", gap: "12px" },
-          },
+            {
+              className: "row mb-3",
+              style: { display: "flex", alignItems: "center", gap: "12px" },
+            },
           CirclePreview(
-            absSrc(bgVideoPreview || info?.background?.videoUrl || ""),
+            fileUrl(bgVideoPreview || info?.background?.videoUrl || ""),
             "video"
           ),
           input(

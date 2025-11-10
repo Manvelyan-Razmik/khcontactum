@@ -6,17 +6,29 @@ import path from "path";
 import { auth } from "../middleware/auth.js";
 import { pool } from "../db.js";
 
-const UPLOAD_DIR = path.join(process.cwd(), "uploads");
+const r = Router();
+
+/* ================== UPLOAD DIR ================== */
+/**
+ * Կարևոր քայլ՝ որ ֆայլերը չկորչեն restart / deploy-ից հետո.
+ * Եթե Render-ի վրա persistent disk ես կցել, ENV-ում դնում ես
+ *   UPLOAD_DIR=/data/uploads
+ * Իսկ local dev-ում չի լինի՝ կընկնի default `./uploads` պանակի վրա.
+ */
+const UPLOAD_DIR =
+  process.env.UPLOAD_DIR || path.join(process.cwd(), "uploads");
+
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
-// ==== storage ====
+/* ================== MULTER STORAGE ================== */
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, UPLOAD_DIR),
   filename: (_req, file, cb) => {
     const ext = path.extname(file.originalname || "").toLowerCase();
-    const safe = Date.now() + "-" + Math.random().toString(36).slice(2) + ext;
+    const safe =
+      Date.now() + "-" + Math.random().toString(36).slice(2) + ext;
     cb(null, safe);
-  }
+  },
 });
 
 /* ===== formats ===== */
@@ -25,16 +37,12 @@ const imageMimes = [
   "image/jpeg",
   "image/webp",
   "image/gif",
-  "image/jpg"
+  "image/jpg",
   // SVG անջատած ենք թողնում անվտանգության համար
   // "image/svg+xml"
 ];
 
-const videoMimes = [
-  "video/mp4",
-  "video/webm",
-  "video/ogg"
-];
+const videoMimes = ["video/mp4", "video/webm", "video/ogg"];
 
 // svg-ն էլ ենք հանում ext-երի list-ից
 const allowedImageExts = ["png", "jpg", "jpeg", "webp", "gif"];
@@ -65,7 +73,7 @@ const MAX_UPLOAD_MB = Number(process.env.MAX_UPLOAD_MB || 20);
 const upload = multer({
   storage,
   fileFilter,
-  limits: { fileSize: MAX_UPLOAD_MB * 1024 * 1024 }
+  limits: { fileSize: MAX_UPLOAD_MB * 1024 * 1024 },
 });
 
 /* small util to set nested path */
@@ -82,12 +90,26 @@ function setPath(obj, pathStr, value) {
   return obj;
 }
 
-const r = Router();
+/* small util to build public origin (https://khcontactum.com կամ backend host) */
+function getPublicOrigin(req) {
+  // Եթե ունես PUBLIC_ORIGIN env (օր. https://khcontactum.com կամ https://khcontactum.onrender.com)
+  if (process.env.PUBLIC_ORIGIN) {
+    return process.env.PUBLIC_ORIGIN.replace(/\/+$/, "");
+  }
+  // fallback՝ ըստ request-ի
+  const proto = req.headers["x-forwarded-proto"] || req.protocol || "http";
+  const host = req.get("host");
+  return `${proto}://${host}`;
+}
 
 /**
  * POST /api/upload
  * FormData: file=<blob>, field=<json.path>
- * Example fields: "logo_url", "background.imageUrl", "background.videoUrl", "avatar.imageUrl"
+ * Example fields:
+ *   "logo_url",
+ *   "background.imageUrl",
+ *   "background.videoUrl",
+ *   "avatar.imageUrl"
  */
 r.post("/", auth("admin"), (req, res) => {
   upload.single("file")(req, res, async (err) => {
@@ -107,9 +129,14 @@ r.post("/", auth("admin"), (req, res) => {
         return res.status(400).json({ error: "No file" });
       }
 
-      const url = `/file/${req.file.filename}`;
-      const field = (req.body.field || "").trim();
+      // DB-ում պահում ենք ՀԱՐԱՔԻՑ path (որպես "/file/...")
+      const urlPath = `/file/${req.file.filename}`;
 
+      // Admin preview-ի համար հաշվում ենք ԼԻԱՐԺԵՔ URL
+      const origin = getPublicOrigin(req); // напр. https://khcontactum.com կամ https://khcontactum.onrender.com
+      const fullUrl = `${origin}${urlPath}`;
+
+      const field = (req.body.field || "").trim();
       let information = null;
 
       if (field) {
@@ -120,7 +147,7 @@ r.post("/", auth("admin"), (req, res) => {
         const info = rows[0]?.information || {};
 
         // background.imageUrl, avatar.videoUrl և այլն
-        setPath(info, field, url);
+        setPath(info, field, urlPath); // DB-ում պահում ենք հարաբերական path-ը, ոչ թե full URL
 
         await pool.query(
           `INSERT INTO admin_info (admin_id, information, updated_at)
@@ -135,11 +162,14 @@ r.post("/", auth("admin"), (req, res) => {
 
       return res.json({
         ok: true,
-        url,
+        // frontend admin preview-ի համար՝ լիարժեք URL
+        url: fullUrl,
+        // եթե պետք լինի՝ հարաբերական path-ը նույնպես
+        path: urlPath,
         mime: req.file.mimetype,
         size: req.file.size,
         field: field || null,
-        information
+        information,
       });
     } catch (e) {
       console.error(e);

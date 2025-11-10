@@ -8,22 +8,51 @@ const h = React.createElement;
 /* ---------- helpers ---------- */
 function absLogo(u = "") {
   if (!u) return "";
-  // Arden absolute / data / blob url e
-  if (/^(data:|https?:\/\/|blob:)/i.test(u)) return u;
 
-  // qcel "server/" skzbic, ete ka
-  let clean = String(u).trim().replace(/^server\//i, "");
-  if (!clean.startsWith("/")) clean = "/" + clean;
+  // Եթե data/blob URL է, 그대로 թողնում ենք
+  if (/^(data:|blob:)/i.test(u)) return u;
 
-  // API-ic vercnum enq origin-@ (http://localhost:5050 kam https://khcontactum.onrender.com)
-  try {
-    const apiUrl = new URL(API);
-    return `${apiUrl.origin}${clean}`;
-  } catch {
-    // anhamapatasxan API depqum veradardznum enq miayn path-@,
-    // vor kshatvi local dev-um
-    return clean;
+  let s = String(u).trim();
+
+  // հին "server/..." ուղիների support
+  s = s.replace(/^server\//i, "");
+
+  // Եթե արդեն absolute http/https URL է
+  if (/^https?:\/\//i.test(s)) {
+    try {
+      const url = new URL(s);
+
+      // Եթե http է, վերածում ենք https-ի, որ https էջում mixed content չլինի
+      if (url.protocol === "http:") {
+        url.protocol = "https:";
+      }
+      return url.toString();
+    } catch {
+      // եթե ինչ-որ պատճառներով URL-ը չի parseվում, 그대로 վերադարձնում ենք
+      return s;
+    }
   }
+
+  // Հարակից path — դարձնում ենք "/..."
+  if (!s.startsWith("/")) s = "/" + s;
+
+  // 1) Փորձում ենք API-ից վերցնել origin-ը ( напр. https://khcontactum.onrender.com )
+  if (API) {
+    try {
+      const apiUrl = new URL(API);
+      return apiUrl.origin + s;
+    } catch (e) {
+      console.warn("absLogo: bad API, fallback to window.origin", API, e);
+    }
+  }
+
+  // 2) fallback — նույն domain-ը, որով կայքը բացված է ( напр. https://khcontactum.com )
+  if (typeof window !== "undefined" && window.location?.origin) {
+    return window.location.origin + s;
+  }
+
+  // 3) Վերջին fallback — վերադարձնում ենք հարաբերական path-ը
+  return s;
 }
 
 function pickLang(v, lang, fallbacks = ["am", "en", "ru", "ar", "fr"]) {

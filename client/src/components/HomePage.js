@@ -13,31 +13,18 @@ const h = React.createElement;
 /* ------------ utils ------------ */
 function absSrc(u = "") {
   if (!u) return "";
-  // եթե արդեն լիարժեք URL է կամ data/blob է՝ 그대로 թողնում ենք
+  // absolute / data / blob
   if (/^(data:|https?:\/\/|blob:)/i.test(u)) return u;
 
   const path = u.startsWith("/") ? u : "/" + u;
 
-  // 1) փորձում ենք API-ի միջոցով (Render / backend base)
-  if (API) {
-    try {
-      const apiUrl = new URL(API);      // напр. https://khcontactum.onrender.com
-      return apiUrl.origin + path;      // https://khcontactum.onrender.com/file/...
-    } catch (e) {
-      // եթե API-ն սխալ է, անցնում ենք fallback-ին
-      console.warn("absSrc: bad API, falling back to window.origin", API, e);
-    }
+  try {
+    const apiUrl = new URL(API);        // напр. https://khcontactum.onrender.com
+    return `${apiUrl.origin}${path}`;   // https://khcontactum.onrender.com/file/...
+  } catch {
+    return path;
   }
-
-  // 2) եթե window կա՝ օգտագործում ենք հենց այն domain-ը, որով բացված է կայքը (օր. https://khcontactum.com)
-  if (typeof window !== "undefined" && window.location?.origin) {
-    return window.location.origin + path;
-  }
-
-  // 3) վերջին fallback — վերադարձնում ենք ուղղակի հարաբերական path
-  return path;
 }
-
 
 function isVideo(u = "") {
   return /\.(mp4|webm|ogg)(\?.*)?$/i.test(u);

@@ -65,7 +65,7 @@ app.set("trust proxy", TRUST_PROXY_ENABLED ? 1 : 0);
 // gzip compression — փոքր response-ներ, արագ բեռնում
 app.use(compression());
 
-/* ✅ Helmet — թույլ ենք տալիս cross-origin resources (նկար, video)
+/* ✅ Helmet — թույլ ենք տալիս cross-origin resources (նկար, video),
    որ կարողանաս օգտագործել դրանք front-end-ում */
 app.use(
   helmet({
@@ -93,7 +93,7 @@ const corsOptions = {
   credentials: true,
 };
 
-// Գլոբալ CORS middleware (OPTIONS-ներն էլ կն обработки)
+// Գլոբալ CORS middleware (OPTIONS-ներն էլ կընդունի)
 app.use(cors(corsOptions));
 
 /* ================== BODY & COOKIES ================== */
@@ -112,7 +112,7 @@ app.use((req, _res, next) => {
 
 /* ================== BASIC ROUTES ================== */
 
-// 👉 ROOT route
+// 👉 ROOT route (ավելի շատ health-check-ի համար)
 app.get("/", (_req, res) => {
   res
     .status(200)
@@ -160,8 +160,9 @@ if (process.env.NODE_ENV === "production") {
   // Serve client build (Vite)՝ client/dist-ից
   app.use(express.static(CLIENT_DIST));
 
-  // SPA fallback — React Router-ի բոլոր ուղիների համար
-  app.get("*", (_req, res) => {
+  // SPA fallback — բոլոր մնացած ուղիների համար (ոչ /api, ոչ /file),
+  // այստեղ այլևս "*" չենք օգտագործում, որ path-to-regexp-ը error չտա
+  app.get(/.*/, (_req, res) => {
     res.sendFile(path.join(CLIENT_DIST, "index.html"));
   });
 }

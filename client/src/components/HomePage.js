@@ -1,6 +1,6 @@
 // client/src/components/HomePage.js
 import React from "react";
-import { getPublicInfoByCardId, API } from "../api.js";
+import { getPublicInfoByCardId } from "../api.js";
 import "./Responcive.css";
 
 import IconsPage     from "./IconsPage.js";
@@ -13,19 +13,12 @@ const h = React.createElement;
 /* ------------ utils ------------ */
 function absSrc(u = "") {
   if (!u) return "";
-  // absolute / data / blob
   if (/^(data:|https?:\/\/|blob:)/i.test(u)) return u;
-
+  const host =
+    typeof window !== "undefined" ? window.location.hostname : "localhost";
   const path = u.startsWith("/") ? u : "/" + u;
-
-  try {
-    const apiUrl = new URL(API);        // напр. https://khcontactum.onrender.com
-    return `${apiUrl.origin}${path}`;   // https://khcontactum.onrender.com/file/...
-  } catch {
-    return path;
-  }
+  return `http://${host}:5050${path}`;
 }
-
 function isVideo(u = "") {
   return /\.(mp4|webm|ogg)(\?.*)?$/i.test(u);
 }
@@ -337,21 +330,10 @@ export default function HomePage({ cardId = "101" }) {
   const nameColor = info?.company?.nameColor || "#111";
   const descColor = info?.description?.color || info?.profile?.aboutColor || "#666";
 
-  /* ---------- avatar selection (type-aware) ---------- */
   let avatarUrl = "";
-  let avatarType = "";
   const avTop = info?.avatar;
-
   if (avTop && typeof avTop === "object") {
-    avatarType = avTop.type || "";
-    if (avatarType === "image") {
-      avatarUrl = avTop.imageUrl || avTop.videoUrl || "";
-    } else if (avatarType === "video") {
-      avatarUrl = avTop.videoUrl || avTop.imageUrl || "";
-    } else {
-      // fallback — հին տվյալների համար
-      avatarUrl = avTop.videoUrl || avTop.imageUrl || "";
-    }
+    avatarUrl = avTop.videoUrl || avTop.imageUrl || "";
   } else if (typeof avTop === "string") {
     avatarUrl = avTop;
   } else {
@@ -361,16 +343,9 @@ export default function HomePage({ cardId = "101" }) {
         ? avProf.videoUrl || avProf.imageUrl || ""
         : avProf || info?.assets?.logo_url || info?.logo_url || "";
   }
-
   const avatarAbs = absSrc(avatarUrl);
-  const avatarIsVideo =
-    avatarType === "video"
-      ? true
-      : avatarType === "image"
-      ? false
-      : isVideo(avatarAbs);
+  const avatarIsVideo = isVideo(avatarAbs);
 
-  /* ---------- background ---------- */
   const bg =
     info?.background || {
       type: "color",
@@ -419,6 +394,7 @@ export default function HomePage({ cardId = "101" }) {
   const brandsTitleColor = info?.brandsTitleColor || "#000000";
   const brandsTitleText = info?.brandsTitleText || "ՄԵՐ ԲՐԵՆԴՆԵՐԸ";
   const brandsBgColor = info?.brandsBgColor || "#ffffff";
+  const brandsNameColor = info?.brandsNameColor || "#000000";
 
   const brandInfos = Array.isArray(info?.brandInfos) ? info.brandInfos : [];
   const showBrandInfo = !!activeBrandKeyword;
@@ -577,6 +553,7 @@ export default function HomePage({ cardId = "101" }) {
                   brandsTitleText,
                   brandsCols,
                   brandsBgColor,
+                  brandsNameColor,
                   lang,
                   onKeywordClick: (kw) => setActiveBrandKeyword(kw),
                 })

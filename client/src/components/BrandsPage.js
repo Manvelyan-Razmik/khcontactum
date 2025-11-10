@@ -20,8 +20,8 @@ function absLogo(u = "") {
     const apiUrl = new URL(API);
     return `${apiUrl.origin}${clean}`;
   } catch {
-    // anhamapatasxan API depqum voch mi ban chi qche — veradardznum enq miayn path-@,
-    // vor kamapetq e local dev-um
+    // anhamapatasxan API depqum veradardznum enq miayn path-@,
+    // vor kshatvi local dev-um
     return clean;
   }
 }
@@ -29,7 +29,6 @@ function absLogo(u = "") {
 function pickLang(v, lang, fallbacks = ["am", "en", "ru", "ar", "fr"]) {
   if (!v) return "";
   if (typeof v === "string") return v;
-
   const order = [lang, ...fallbacks.filter((x) => x !== lang)];
   for (const k of order) {
     const s = v?.[k];
@@ -43,6 +42,7 @@ function pickLang(v, lang, fallbacks = ["am", "en", "ru", "ar", "fr"]) {
  * - brands: [{ name, href, logo, linkType, keyword }]
  * - brandsTitleColor
  * - brandsTitleText
+ * - brandsNameColor
  * - brandsCols: 1 | 2 | 3
  * - brandsBgColor (for cols=1)
  * - lang
@@ -52,6 +52,7 @@ export default function BrandsPage({
   brands = [],
   brandsTitleColor = "#000000",
   brandsTitleText = "ՄԵՐ ԲՐԵՆԴՆԵՐԸ",
+  brandsNameColor = "#000000",
   brandsCols = 3,
   brandsBgColor = "#ffffff",
   lang = "am",
@@ -162,7 +163,11 @@ export default function BrandsPage({
             h(
               "span",
               {
-                style: { fontWeight: 700, fontSize: 15, color: "#000" },
+                style: {
+                  fontWeight: 700,
+                  fontSize: 15,
+                  color: brandsNameColor,
+                },
               },
               name || ""
             )
@@ -296,6 +301,7 @@ export default function BrandsPage({
                   textAlign: "center",
                   lineHeight: 1.25,
                   maxWidth: 160,
+                  color: brandsNameColor,
                 },
               },
               name || ""

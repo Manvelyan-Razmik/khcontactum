@@ -7,159 +7,170 @@ const LANGS = ["am", "ru", "en", "ar", "fr"];
 
 /* ---------- UI TEXT ---------- */
 const BRANDS_UI_TEXT = {
-am: {
-  titleColorLabel: "Վերնագրի գույն :",
-  titleTextLabel: "Վերնագրի տեքստը:",
-  colsLabel: "Սյունակների թիվը:",
-  colsOption3: "3",
-  colsOption2: "2",
-  colsOption1: "1 (մեկ սյունակ)",
-  rowBgLabel: `Մեկ սյունակով քարտերի ֆոն (Սյունակ 1)`,
+  am: {
+    heading: "Բրենդներ / Ծառայություններ",
+    titleColorLabel: "Վերնագրի գույն :",
+    nameColorLabel: "Անունների գույն :",
+    titleTextLabel: "Վերնագրի տեքստը:",
+    colsLabel: "Սյունակների թիվը:",
+    colsOption3: "3",
+    colsOption2: "2",
+    colsOption1: "1 (մեկ սյունակ)",
+    rowBgLabel: `Մեկ սյունակով քարտերի ֆոն (Սյունակ 1)`,
 
-  brandNameLabel: "Բրենդի անուն:",
-  uploadButton: "Վերբեռնել",
-  deleteButton: "Ջնջել",
-  linkTypeLabel: "Լինքի տիպը:",
-  linkTypeKeyword: "Keyword",
-  linkTypeUrl: "URL",
-  keywordPlaceholder: "օր. goodrealty",
-  hrefPlaceholder: "https://example.com/...",
+    brandNameLabel: "Բրենդի անուն:",
+    uploadButton: "Վերբեռնել",
+    deleteButton: "Ջնջել",
+    linkTypeLabel: "Լինքի տիպը:",
+    linkTypeKeyword: "Keyword",
+    linkTypeUrl: "URL",
+    keywordPlaceholder: "օր. goodrealty",
+    hrefPlaceholder: "https://example.com/...",
 
-  addButton: "Ավելացնել",
-  saveButton: "Պահել",
-  savingButton: "Պահպանում…",
-  loading: "Բեռնվում է…",
+    addButton: "Ավելացնել",
+    saveButton: "Պահել",
+    savingButton: "Պահպանում…",
+    loading: "Բեռնվում է…",
 
-  fileTypeError: "Ընդունվում են միայն նկար ֆայլեր",
-  uploadOk: "Լոգոն վերբեռնվեց ✔",
-  uploadFailed: "Վերբեռնումը ձախողվեց",
-  loadFailed: "Ներբեռնումը ձախողվեց",
-  savedOk: "Պահվեց ✅",
-  saveFailed: "Պահպանելը ձախողվեց",
-},
+    fileTypeError: "Ընդունվում են միայն նկար ֆայլեր",
+    uploadOk: "Լոգոն վերբեռնվեց ✔",
+    uploadFailed: "Վերբեռնումը ձախողվեց",
+    loadFailed: "Ներբեռնումը ձախողվեց",
+    savedOk: "Պահվեց ✅",
+    saveFailed: "Պահպանելը ձախողվեց",
+  },
 
-en: {
-  titleColorLabel: "Title color:",
-  titleTextLabel: "Title text:",
-  colsLabel: "Number of columns:",
-  colsOption3: "3",
-  colsOption2: "2",
-  colsOption1: "1 (single column)",
-  rowBgLabel: "Background for single-column cards (Column 1)",
+  en: {
+    heading: "Brands / Services",
+    titleColorLabel: "Title color:",
+    nameColorLabel: "Name color:",
+    titleTextLabel: "Title text:",
+    colsLabel: "Number of columns:",
+    colsOption3: "3",
+    colsOption2: "2",
+    colsOption1: "1 (single column)",
+    rowBgLabel: "Background for single-column cards (Column 1)",
 
-  brandNameLabel: "Brand name:",
-  uploadButton: "Upload",
-  deleteButton: "Delete",
-  linkTypeLabel: "Link type:",
-  linkTypeKeyword: "Keyword",
-  linkTypeUrl: "URL",
-  keywordPlaceholder: "e.g. goodrealty",
-  hrefPlaceholder: "https://example.com/...",
+    brandNameLabel: "Brand name:",
+    uploadButton: "Upload",
+    deleteButton: "Delete",
+    linkTypeLabel: "Link type:",
+    linkTypeKeyword: "Keyword",
+    linkTypeUrl: "URL",
+    keywordPlaceholder: "e.g. goodrealty",
+    hrefPlaceholder: "https://example.com/...",
 
-  addButton: "Add",
-  saveButton: "Save",
-  savingButton: "Saving…",
-  loading: "Loading…",
+    addButton: "Add",
+    saveButton: "Save",
+    savingButton: "Saving…",
+    loading: "Loading…",
 
-  fileTypeError: "Only image files are accepted",
-  uploadOk: "Logo uploaded ✔",
-  uploadFailed: "Upload failed",
-  loadFailed: "Loading failed",
-  savedOk: "Saved ✅",
-  saveFailed: "Save failed",
-},
+    fileTypeError: "Only image files are accepted",
+    uploadOk: "Logo uploaded ✔",
+    uploadFailed: "Upload failed",
+    loadFailed: "Loading failed",
+    savedOk: "Saved ✅",
+    saveFailed: "Save failed",
+  },
 
-ru: {
-  titleColorLabel: "Цвет заголовка:",
-  titleTextLabel: "Текст заголовка:",
-  colsLabel: "Количество столбцов:",
-  colsOption3: "3",
-  colsOption2: "2",
-  colsOption1: "1 (один столбец)",
-  rowBgLabel: "Фон карточек с одним столбцом (Столбец 1)",
+  ru: {
+    heading: "Бренды / Услуги",
+    titleColorLabel: "Цвет заголовка:",
+    nameColorLabel: "Цвет названий:",
+    titleTextLabel: "Текст заголовка:",
+    colsLabel: "Количество столбцов:",
+    colsOption3: "3",
+    colsOption2: "2",
+    colsOption1: "1 (один столбец)",
+    rowBgLabel: "Фон карточек с одним столбцом (Столбец 1)",
 
-  brandNameLabel: "Название бренда:",
-  uploadButton: "Загрузить",
-  deleteButton: "Удалить",
-  linkTypeLabel: "Тип ссылки:",
-  linkTypeKeyword: "Ключевое слово",
-  linkTypeUrl: "URL",
-  keywordPlaceholder: "например goodrealty",
-  hrefPlaceholder: "https://example.com/...",
+    brandNameLabel: "Название бренда:",
+    uploadButton: "Загрузить",
+    deleteButton: "Удалить",
+    linkTypeLabel: "Тип ссылки:",
+    linkTypeKeyword: "Ключевое слово",
+    linkTypeUrl: "URL",
+    keywordPlaceholder: "например goodrealty",
+    hrefPlaceholder: "https://example.com/...",
 
-  addButton: "Добавить",
-  saveButton: "Сохранить",
-  savingButton: "Сохранение…",
-  loading: "Загрузка…",
+    addButton: "Добавить",
+    saveButton: "Сохранить",
+    savingButton: "Сохранение…",
+    loading: "Загрузка…",
 
-  fileTypeError: "Допускаются только файлы изображений",
-  uploadOk: "Логотип загружен ✔",
-  uploadFailed: "Ошибка загрузки",
-  loadFailed: "Ошибка при загрузке",
-  savedOk: "Сохранено ✅",
-  saveFailed: "Ошибка сохранения",
-},
-ar: {
-  titleColorLabel: "لون العنوان:",
-  titleTextLabel: "نص العنوان:",
-  colsLabel: "عدد الأعمدة:",
-  colsOption3: "3",
-  colsOption2: "2",
-  colsOption1: "1 (عمود واحد)",
-  rowBgLabel: "خلفية البطاقات ذات العمود الواحد (العمود 1):",
+    fileTypeError: "Допускаются только файлы изображений",
+    uploadOk: "Логотип загружен ✔",
+    uploadFailed: "Ошибка загрузки",
+    loadFailed: "Ошибка при загрузке",
+    savedOk: "Сохранено ✅",
+    saveFailed: "Ошибка сохранения",
+  },
 
-  brandNameLabel: "اسم العلامة التجارية:",
-  uploadButton: "رفع",
-  deleteButton: "حذف",
-  linkTypeLabel: "نوع الرابط:",
-  linkTypeKeyword: "كلمة مفتاحية",
-  linkTypeUrl: "رابط URL",
-  keywordPlaceholder: "مثلاً goodrealty",
-  hrefPlaceholder: "https://example.com/...",
+  ar: {
+    heading: "العلامات / الخدمات",
+    titleColorLabel: "لون العنوان:",
+    nameColorLabel: "لون الأسماء:",
+    titleTextLabel: "نص العنوان:",
+    colsLabel: "عدد الأعمدة:",
+    colsOption3: "3",
+    colsOption2: "2",
+    colsOption1: "1 (عمود واحد)",
+    rowBgLabel: "خلفية البطاقات ذات العمود الواحد (العمود 1):",
 
-  addButton: "إضافة",
-  saveButton: "حفظ",
-  savingButton: "جاري الحفظ…",
-  loading: "جاري التحميل…",
+    brandNameLabel: "اسم العلامة التجارية:",
+    uploadButton: "رفع",
+    deleteButton: "حذف",
+    linkTypeLabel: "نوع الرابط:",
+    linkTypeKeyword: "كلمة مفتاحية",
+    linkTypeUrl: "رابط URL",
+    keywordPlaceholder: "مثلاً goodrealty",
+    hrefPlaceholder: "https://example.com/...",
 
-  fileTypeError: "يُقبل فقط ملفات الصور",
-  uploadOk: "تم رفع الشعار ✔",
-  uploadFailed: "فشل الرفع",
-  loadFailed: "فشل التحميل",
-  savedOk: "تم الحفظ ✅",
-  saveFailed: "فشل الحفظ",
-},
+    addButton: "إضافة",
+    saveButton: "حفظ",
+    savingButton: "جاري الحفظ…",
+    loading: "جاري التحميل…",
 
-fr: {
-  titleColorLabel: "Couleur du titre :",
-  titleTextLabel: "Texte du titre :",
-  colsLabel: "Nombre de colonnes :",
-  colsOption3: "3",
-  colsOption2: "2",
-  colsOption1: "1 (une seule colonne)",
-  rowBgLabel: "Fond des cartes à une colonne (Colonne 1)",
+    fileTypeError: "يُقبل فقط ملفات الصور",
+    uploadOk: "تم رفع الشعار ✔",
+    uploadFailed: "فشل الرفع",
+    loadFailed: "فشل التحميل",
+    savedOk: "تم الحفظ ✅",
+    saveFailed: "فشل الحفظ",
+  },
 
-  brandNameLabel: "Nom de la marque :",
-  uploadButton: "Téléverser",
-  deleteButton: "Supprimer",
-  linkTypeLabel: "Type de lien :",
-  linkTypeKeyword: "Mot-clé",
-  linkTypeUrl: "URL",
-  keywordPlaceholder: "ex. goodrealty",
-  hrefPlaceholder: "https://example.com/...",
+  fr: {
+    heading: "Marques / Services",
+    titleColorLabel: "Couleur du titre :",
+    nameColorLabel: "Couleur des noms :",
+    titleTextLabel: "Texte du titre :",
+    colsLabel: "Nombre de colonnes :",
+    colsOption3: "3",
+    colsOption2: "2",
+    colsOption1: "1 (une seule colonne)",
+    rowBgLabel: "Fond des cartes à une colonne (Colonne 1)",
 
-  addButton: "Ajouter",
-  saveButton: "Enregistrer",
-  savingButton: "Enregistrement…",
-  loading: "Chargement…",
+    brandNameLabel: "Nom de la marque :",
+    uploadButton: "Téléverser",
+    deleteButton: "Supprimer",
+    linkTypeLabel: "Type de lien :",
+    linkTypeKeyword: "Mot-clé",
+    linkTypeUrl: "URL",
+    keywordPlaceholder: "ex. goodrealty",
+    hrefPlaceholder: "https://example.com/...",
 
-  fileTypeError: "Seuls les fichiers image sont acceptés",
-  uploadOk: "Logo téléversé ✔",
-  uploadFailed: "Échec du téléversement",
-  loadFailed: "Échec du chargement",
-  savedOk: "Enregistré ✅",
-  saveFailed: "Échec de l’enregistrement",
-}
+    addButton: "Ajouter",
+    saveButton: "Enregistrer",
+    savingButton: "Enregistrement…",
+    loading: "Chargement…",
+
+    fileTypeError: "Seuls les fichiers image sont acceptés",
+    uploadOk: "Logo téléversé ✔",
+    uploadFailed: "Échec du téléversement",
+    loadFailed: "Échec du chargement",
+    savedOk: "Enregistré ✅",
+    saveFailed: "Échec de l’enregistrement",
+  },
 };
 
 /* ---------- helpers ---------- */
@@ -304,6 +315,7 @@ export default function BrandsTab({ langs, uiLang = "am" }) {
   const [brands, setBrands] = React.useState([]);
 
   const [titleColor, setTitleColor] = React.useState("#000000");
+  const [nameColor, setNameColor]   = React.useState("#000000");
   const [titleTextI18n, setTitleText] = React.useState(
     toI18nObj("ՄԵՐ ԲՐԵՆԴՆԵՐԸ")
   );
@@ -347,6 +359,7 @@ export default function BrandsTab({ langs, uiLang = "am" }) {
         );
 
         setTitleColor(info.brandsTitleColor || "#000000");
+        setNameColor(info.brandsNameColor || "#000000");
         setTitleText(toI18nObj(info.brandsTitleText || "ՄԵՐ ԲՐԵՆԴՆԵՐԸ"));
         setCols(Number(info.brandsCols || 3));
         setRowBg(info.brandsBgColor || "#fcfcfc");
@@ -444,6 +457,7 @@ export default function BrandsTab({ langs, uiLang = "am" }) {
       const next = { ...(baseInfo || {}) };
       next.brands = cleanBrands;
       next.brandsTitleColor = titleColor || "#000000";
+      next.brandsNameColor  = nameColor || "#000000";
       next.brandsTitleText = trimI18nObj(titleTextI18n);
       next.brandsCols = Number(cols) || 3;
       next.brandsBgColor = (rowBg || "").trim();
@@ -471,6 +485,7 @@ export default function BrandsTab({ langs, uiLang = "am" }) {
         })
       );
       setTitleColor(info.brandsTitleColor || "#000000");
+      setNameColor(info.brandsNameColor || "#000000");
       setTitleText(toI18nObj(info.brandsTitleText || ""));
       setCols(Number(info.brandsCols || 3));
       setRowBg(info.brandsBgColor || "#fcfcfc");
@@ -515,6 +530,19 @@ export default function BrandsTab({ langs, uiLang = "am" }) {
         h("span", { className: "hex" }, titleColor)
       ),
 
+      h(
+        "div",
+        { className: "row" },
+        h("label", { className: "lbl" }, T.nameColorLabel),
+        h("input", {
+          type: "color",
+          value: nameColor,
+          onChange: (e) => setNameColor(e.target.value),
+          className: "color-input"
+        }),
+        h("span", { className: "hex" }, nameColor)
+      ),
+
       h(I18nRow, {
         brandId: null,
         label: T.titleTextLabel,
@@ -526,7 +554,7 @@ export default function BrandsTab({ langs, uiLang = "am" }) {
         langs: activeLangs
       }),
 
-      h(  
+      h(
         "div",
         { className: "row" },
         h("label", { className: "lbl" }, T.colsLabel),

@@ -11,7 +11,7 @@ const r = Router();
 /* ================== UPLOAD DIR ================== */
 /**
  * Կարևոր քայլ՝ որ ֆայլերը չկորչեն restart / deploy-ից հետո.
- * Եթե Render-ի վրա persistent disk ես կցել, ENV-ում դնում ես՝
+ * Եթե Render-ի վրա persistent disk ես կցել, ENV-ում դնում ես
  *   UPLOAD_DIR=/data/uploads
  * Իսկ local dev-ում չի լինի՝ կընկնի default `./uploads` պանակի վրա.
  */
@@ -92,8 +92,7 @@ function setPath(obj, pathStr, value) {
 
 /* small util to build public origin (https://khcontactum.com կամ backend host) */
 function getPublicOrigin(req) {
-  // Եթե ունես PUBLIC_ORIGIN env (օր. https://khcontactum.onrender.com)
-  // խորհուրդ է՝ հենց backend host-ը դնես:
+  // Եթե ունես PUBLIC_ORIGIN env (օր. https://khcontactum.com կամ https://khcontactum.onrender.com)
   if (process.env.PUBLIC_ORIGIN) {
     return process.env.PUBLIC_ORIGIN.replace(/\/+$/, "");
   }
@@ -130,11 +129,11 @@ r.post("/", auth("admin"), (req, res) => {
         return res.status(400).json({ error: "No file" });
       }
 
-      // DB-ում պահում ենք ՀԱՐԱԲԵՐԱԿԱՆ path (որպես "/file/...")
+      // DB-ում պահում ենք ՀԱՐԱՔԻՑ path (որպես "/file/...")
       const urlPath = `/file/${req.file.filename}`;
 
       // Admin preview-ի համար հաշվում ենք ԼԻԱՐԺԵՔ URL
-      const origin = getPublicOrigin(req); // напр. https://khcontactum.onrender.com
+      const origin = getPublicOrigin(req); // напр. https://khcontactum.com կամ https://khcontactum.onrender.com
       const fullUrl = `${origin}${urlPath}`;
 
       const field = (req.body.field || "").trim();
@@ -148,8 +147,7 @@ r.post("/", auth("admin"), (req, res) => {
         const info = rows[0]?.information || {};
 
         // background.imageUrl, avatar.videoUrl և այլն
-        // DB-ում պահում ենք հարաբերական path-ը, որ env-երից կախված չլինի
-        setPath(info, field, urlPath);
+        setPath(info, field, urlPath); // DB-ում պահում ենք հարաբերական path-ը, ոչ թե full URL
 
         await pool.query(
           `INSERT INTO admin_info (admin_id, information, updated_at)
@@ -166,7 +164,7 @@ r.post("/", auth("admin"), (req, res) => {
         ok: true,
         // frontend admin preview-ի համար՝ լիարժեք URL
         url: fullUrl,
-        // նաև հարաբերական path-ը, որն է DB-ի value-ն
+        // եթե պետք լինի՝ հարաբերական path-ը նույնպես
         path: urlPath,
         mime: req.file.mimetype,
         size: req.file.size,

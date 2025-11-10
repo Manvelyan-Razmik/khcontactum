@@ -5,6 +5,7 @@ import {
   adminInfoSave,    // alias of adminSaveInfo(token, payload)
   adminUploadFile,  // alias of uploadFile(token, file, field)
 } from "../api.js";
+import { fileUrl } from "../utils/fileUrl.js";
 
 const h = React.createElement;
 
@@ -292,14 +293,17 @@ export default function HomeTab() {
     try {
       const f = e.target.files?.[0];
       if (!f) return;
-      const { ok, url, error } = await adminUploadFile(token, f);
+      const { ok, url, path, error } = await adminUploadFile(token, f);
       if (!ok) throw new Error(error || "Upload failed");
+
+      // DB-ի մեջ պահելու համար օգտագործում ենք path-ը, եթե կա, հակառակ դեպքում՝ url
+      const stored = path || url;
 
       if (background.type === "image") {
         setBackground(s => ({
           type: s?.type || "image",
           color: s?.color ?? "#ffffff",
-          imageUrl: url,
+          imageUrl: stored,
           videoUrl: ""
         }));
       } else if (background.type === "video") {
@@ -307,7 +311,7 @@ export default function HomeTab() {
           type: s?.type || "video",
           color: s?.color ?? "#ffffff",
           imageUrl: "",
-          videoUrl: url
+          videoUrl: stored
         }));
       }
 
@@ -324,15 +328,17 @@ export default function HomeTab() {
     try {
       const f = e.target.files?.[0];
       if (!f) return;
-      const { ok, url, error } = await adminUploadFile(token, f);
+      const { ok, url, path, error } = await adminUploadFile(token, f);
       if (!ok) throw new Error(error || "Upload failed");
+
+      const stored = path || url;
 
       setProfile(s => ({
         about: {
           ...(s?.about || {})
         },
         aboutColor: s?.aboutColor ?? "#000000",
-        avatar: url || s?.avatar || ""
+        avatar: stored || s?.avatar || ""
       }));
 
       setMsg("Ավատարը վերբեռնված է");
@@ -367,11 +373,13 @@ export default function HomeTab() {
 
   const debouncedAutoSave = useDebounced(() => { doSave(); }, 800);
 
-  const mediaUrl =
+  const rawMediaUrl =
     background.type === "video" ? background.videoUrl :
     background.type === "image" ? background.imageUrl : "";
 
-  const isVid = background.type === "video" || isVideoUrl(mediaUrl);
+  const mediaUrl = fileUrl(rawMediaUrl);
+
+  const isVid = background.type === "video" || isVideoUrl(rawMediaUrl);
 
   const toggleLang = (code) => {
     setLangs(prev => {
@@ -502,6 +510,45 @@ export default function HomeTab() {
           style:{ display:"none" },
           onChange: onAvatarFile
         })
+      )
+    ),
+
+    // Avatar preview (կլոր դաշտ)
+    h("div", {
+      style:{
+        marginTop:8,
+        display:"flex",
+        alignItems:"center",
+        gap:10
+      }
+    },
+      h("div", {
+        style:{
+          width:64,
+          height:64,
+          borderRadius:"50%",
+          overflow:"hidden",
+          background:"#f5f5f5",
+          display:"grid",
+          placeItems:"center",
+          border:"1px solid rgba(0,0,0,.08)"
+        }
+      },
+        profile?.avatar
+          ? (isVideoUrl(profile.avatar)
+              ? h(PreviewVideo, {
+                  src: fileUrl(profile.avatar),
+                  style:{ width:"100%", height:"100%", objectFit:"cover" }
+                })
+              : h("img", {
+                  src: fileUrl(profile.avatar),
+                  alt:"avatar preview",
+                  style:{ width:"100%", height:"100%", objectFit:"cover" }
+                })
+            )
+          : h("div", {
+              style:{ opacity:.6, fontSize:11 }
+            }, "No avatar")
       )
     ),
 

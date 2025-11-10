@@ -1,8 +1,7 @@
 // client/src/components/HomePage.js
 import React from "react";
-import { getPublicInfoByCardId } from "../api.js";
+import { getPublicInfoByCardId, API } from "../api.js"; // ⬅️ API-ն էլ ենք բերում
 import "./Responcive.css";
-
 
 import IconsPage     from "./IconsPage.js";
 import BrandsPage    from "./BrandsPage.js";
@@ -14,12 +13,22 @@ const h = React.createElement;
 /* ------------ utils ------------ */
 function absSrc(u = "") {
   if (!u) return "";
+  // արդեն absolute կամ blob/data URL է
   if (/^(data:|https?:\/\/|blob:)/i.test(u)) return u;
-  const host =
-    typeof window !== "undefined" ? window.location.hostname : "localhost";
+
+  // ապահով դարձնենք, որ path-ը սկսվի '/'-ով
   const path = u.startsWith("/") ? u : "/" + u;
-  return `http://${host}:5050${path}`;
+
+  // օգտագործում ենք API base-ը, որ աշխատի և localhost-ում, և Render-ում
+  try {
+    const apiUrl = new URL(API);        // напр. https://khcontactum.onrender.com
+    return `${apiUrl.origin}${path}`;   // 👉 https://khcontactum.onrender.com/file/....
+  } catch {
+    // fallback — relative URL, եթե ինչ-որ պատճառով API-ն invalid է
+    return path;
+  }
 }
+
 function isVideo(u = "") {
   return /\.(mp4|webm|ogg)(\?.*)?$/i.test(u);
 }

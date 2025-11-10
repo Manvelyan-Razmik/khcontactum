@@ -1,6 +1,6 @@
 // client/src/components/HomePage.js
 import React from "react";
-import { getPublicInfoByCardId, API } from "../api.js"; // ⬅️ API-ն էլ ենք բերում
+import { getPublicInfoByCardId, API } from "../api.js";
 import "./Responcive.css";
 
 import IconsPage     from "./IconsPage.js";
@@ -13,18 +13,15 @@ const h = React.createElement;
 /* ------------ utils ------------ */
 function absSrc(u = "") {
   if (!u) return "";
-  // արդեն absolute կամ blob/data URL է
+  // absolute / data / blob
   if (/^(data:|https?:\/\/|blob:)/i.test(u)) return u;
 
-  // ապահով դարձնենք, որ path-ը սկսվի '/'-ով
   const path = u.startsWith("/") ? u : "/" + u;
 
-  // օգտագործում ենք API base-ը, որ աշխատի և localhost-ում, և Render-ում
   try {
     const apiUrl = new URL(API);        // напр. https://khcontactum.onrender.com
-    return `${apiUrl.origin}${path}`;   // 👉 https://khcontactum.onrender.com/file/....
+    return `${apiUrl.origin}${path}`;   // https://khcontactum.onrender.com/file/...
   } catch {
-    // fallback — relative URL, եթե ինչ-որ պատճառով API-ն invalid է
     return path;
   }
 }
@@ -340,10 +337,21 @@ export default function HomePage({ cardId = "101" }) {
   const nameColor = info?.company?.nameColor || "#111";
   const descColor = info?.description?.color || info?.profile?.aboutColor || "#666";
 
+  /* ---------- avatar selection (type-aware) ---------- */
   let avatarUrl = "";
+  let avatarType = "";
   const avTop = info?.avatar;
+
   if (avTop && typeof avTop === "object") {
-    avatarUrl = avTop.videoUrl || avTop.imageUrl || "";
+    avatarType = avTop.type || "";
+    if (avatarType === "image") {
+      avatarUrl = avTop.imageUrl || avTop.videoUrl || "";
+    } else if (avatarType === "video") {
+      avatarUrl = avTop.videoUrl || avTop.imageUrl || "";
+    } else {
+      // fallback — հին տվյալների համար
+      avatarUrl = avTop.videoUrl || avTop.imageUrl || "";
+    }
   } else if (typeof avTop === "string") {
     avatarUrl = avTop;
   } else {
@@ -353,9 +361,16 @@ export default function HomePage({ cardId = "101" }) {
         ? avProf.videoUrl || avProf.imageUrl || ""
         : avProf || info?.assets?.logo_url || info?.logo_url || "";
   }
-  const avatarAbs = absSrc(avatarUrl);
-  const avatarIsVideo = isVideo(avatarAbs);
 
+  const avatarAbs = absSrc(avatarUrl);
+  const avatarIsVideo =
+    avatarType === "video"
+      ? true
+      : avatarType === "image"
+      ? false
+      : isVideo(avatarAbs);
+
+  /* ---------- background ---------- */
   const bg =
     info?.background || {
       type: "color",

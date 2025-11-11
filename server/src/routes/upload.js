@@ -11,14 +11,65 @@ const r = Router();
 /* ================== UPLOAD DIR ================== */
 /**
  * Կարևոր քայլ՝ որ ֆայլերը չկորչեն restart / deploy-ից հետո.
- * Եթե Render-ի վրա persistent disk ես կցել, ENV-ում դնում ես՝
- *   UPLOAD_DIR=/data/uploads
- * Իսկ local dev-ում չի լինի՝ կընկնի default `./uploads` պանակի վրա.
+ * Render-ի վրա persistent disk ես mount արել
+ *   /opt/render/project/src/server/uploads
+ * և ENV-ում դնում ես՝
+ *   UPLOAD_DIR=/opt/render/project/src/server/uploads
+ *
+ * Local dev-ում env չկա → կընկնի default `./uploads` պանակի վրա.
  */
 const UPLOAD_DIR =
   process.env.UPLOAD_DIR || path.join(process.cwd(), "uploads");
 
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+
+/* ========= small helpers for nested paths / safe delete ======== */
+
+// nested արժեքը վերցնելու համար (օր. "background.imageUrl")
+function getPath(obj, pathStr) {
+  if (!obj || typeof obj !== "object") return undefined;
+  const keys = pathStr.split(".");
+  let cur = obj;
+  for (const k of keys) {
+    if (!cur || typeof cur !== "object") return undefined;
+    cur = cur[k];
+  }
+  return cur;
+}
+
+// nested setter
+function setPath(obj, pathStr, value) {
+  const keys = pathStr.split(".");
+  let cur = obj;
+  for (let i = 0; i < keys.length - 1; i++) {
+    if (typeof cur[keys[i]] !== "object" || cur[keys[i]] === null) {
+      cur[keys[i]] = {};
+    }
+    cur = cur[keys[i]];
+  }
+  cur[keys[keys.length - 1]] = value;
+  return obj;
+}
+
+// /file/<name> → full path դեպի UPLOAD_DIR, անվտանգ
+function safeFilePathFromUrlPath(urlPath) {
+  if (!urlPath || typeof urlPath !== "string") return null;
+  if (!urlPath.startsWith("/file/")) return null;
+
+  const filename = urlPath.slice("/file/".length);
+
+  // չի կարելի "..", "/" կամ "\" ունենալ՝ որ uploads-ից դուրս չգնա
+  if (
+    !filename ||
+    filename.includes("..") ||
+    filename.includes("/") ||
+    filename.includes("\\")
+  ) {
+    return null;
+  }
+
+  return path.join(UPLOAD_DIR, filename);
+}
 
 /* ================== MULTER STORAGE ================== */
 const storage = multer.diskStorage({
@@ -76,24 +127,10 @@ const upload = multer({
   limits: { fileSize: MAX_UPLOAD_MB * 1024 * 1024 },
 });
 
-/* small util to set nested path */
-function setPath(obj, pathStr, value) {
-  const keys = pathStr.split(".");
-  let cur = obj;
-  for (let i = 0; i < keys.length - 1; i++) {
-    if (typeof cur[keys[i]] !== "object" || cur[keys[i]] === null) {
-      cur[keys[i]] = {};
-    }
-    cur = cur[keys[i]];
-  }
-  cur[keys[keys.length - 1]] = value;
-  return obj;
-}
-
 /* small util to build public origin (https://khcontactum.com կամ backend host) */
 function getPublicOrigin(req) {
   // Եթե ունես PUBLIC_ORIGIN env (օր. https://khcontactum.onrender.com)
-  // խորհուրդ է՝ հենց backend host-ը դնես:
+  // խորհուրդ է՝ backend host-ը դնես:
   if (process.env.PUBLIC_ORIGIN) {
     return process.env.PUBLIC_ORIGIN.replace(/\/+$/, "");
   }
@@ -111,6 +148,12 @@ function getPublicOrigin(req) {
  *   "background.imageUrl",
  *   "background.videoUrl",
  *   "avatar.imageUrl"
+ *
+ * Տրամաբանություն.
+ *  1) Մինչև նոր ֆայլ գրելը նայում ենք՝ նույն admin + field-ի համար կա՞ հին path
+ *     եթե կա՝ ֆիզիկապես ջնջում ենք persistent disk-ից
+ *  2) Նոր ֆայլը պահում ենք UPLOAD_DIR-ում
+ *  3) urlPath = "/file/<filename>" գրանցում ենք DB-ում
  */
 r.post("/", auth("admin"), (req, res) => {
   upload.single("file")(req, res, async (err) => {
@@ -130,48 +173,60 @@ r.post("/", auth("admin"), (req, res) => {
         return res.status(400).json({ error: "No file" });
       }
 
-      // DB-ում պահում ենք ՀԱՐԱԲԵՐԱԿԱՆ path (որպես "/file/...")
-      const urlPath = `/file/${req.file.filename}`;
+      const field = (req.body.field || "").trim();
+      if (!field) {
+        return res.status(400).json({ error: "Missing 'field' parameter" });
+      }
 
-      // Admin preview-ի համար հաշվում ենք ԼԻԱՐԺԵՔ URL
-      const origin = getPublicOrigin(req); // напр. https://khcontactum.onrender.com
+      // 1️⃣ նախ վերցնենք տվյալ admin-ի ընթացիկ info-ն
+      const { rows } = await pool.query(
+        "SELECT information FROM admin_info WHERE admin_id=$1",
+        [req.user.admin_id]
+      );
+      const info = rows[0]?.information || {};
+
+      // գտնենք՝ արդյոք այս field-ի տակ արդեն կա հին path
+      const prevUrlPath = getPath(info, field);
+      if (prevUrlPath) {
+        const oldFilePath = safeFilePathFromUrlPath(prevUrlPath);
+        if (oldFilePath && fs.existsSync(oldFilePath)) {
+          try {
+            fs.unlinkSync(oldFilePath); // 🚀 անմիջապես ջնջում ենք հինը
+            console.log("🗑️ Removed old file:", oldFilePath);
+          } catch (e) {
+            console.warn(
+              "⚠️ Couldn't delete old file:",
+              oldFilePath,
+              e.message
+            );
+          }
+        }
+      }
+
+      // 2️⃣ նոր ֆայլը պահվում է persistent disk-ում
+      const urlPath = `/file/${req.file.filename}`;
+      const origin = getPublicOrigin(req);
       const fullUrl = `${origin}${urlPath}`;
 
-      const field = (req.body.field || "").trim();
-      let information = null;
-
-      if (field) {
-        const { rows } = await pool.query(
-          "SELECT information FROM admin_info WHERE admin_id=$1",
-          [req.user.admin_id]
-        );
-        const info = rows[0]?.information || {};
-
-        // background.imageUrl, avatar.videoUrl և այլն
-        // DB-ում պահում ենք հարաբերական path-ը, որ env-երից կախված չլինի
-        setPath(info, field, urlPath);
-
-        await pool.query(
-          `INSERT INTO admin_info (admin_id, information, updated_at)
-           VALUES ($1, $2, now())
-           ON CONFLICT (admin_id) DO UPDATE
-           SET information = EXCLUDED.information,
-               updated_at  = now()`,
-          [req.user.admin_id, info]
-        );
-        information = info;
-      }
+      // 3️⃣ հիմա update ենք անում DB-ի JSONB field-ը նոր path-ով
+      setPath(info, field, urlPath);
+      await pool.query(
+        `INSERT INTO admin_info (admin_id, information, updated_at)
+         VALUES ($1, $2, now())
+         ON CONFLICT (admin_id) DO UPDATE
+         SET information = EXCLUDED.information,
+             updated_at  = now()`,
+        [req.user.admin_id, info]
+      );
 
       return res.json({
         ok: true,
-        // frontend admin preview-ի համար՝ լիարժեք URL
-        url: fullUrl,
-        // նաև հարաբերական path-ը, որն է DB-ի value-ն
-        path: urlPath,
+        url: fullUrl,    // preview-ի համար լիարժեք URL
+        path: urlPath,   // DB-ում պահվող հարաբերական path
+        field,
         mime: req.file.mimetype,
         size: req.file.size,
-        field: field || null,
-        information,
+        information: info,
       });
     } catch (e) {
       console.error(e);

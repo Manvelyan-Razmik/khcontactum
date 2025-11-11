@@ -45,6 +45,10 @@ const __dirname = path.dirname(__filename);
 const DATA_DIR = path.join(__dirname, "../data");
 const CLIENT_DIST = path.join(__dirname, "../../client/dist");
 
+// 👇 Նոր՝ upload-ների իրական ֆոլդերը (persistent disk-ի համար)
+const UPLOAD_DIR =
+  process.env.UPLOAD_DIR || path.join(process.cwd(), "uploads");
+
 /* ================== DB CHECK ================== */
 
 // ✅ Check DB connection once on startup (doesn't stop server if fails)
@@ -147,7 +151,8 @@ app.use(
     res.setHeader("Cache-Control", "public, max-age=604800, immutable");
     next();
   },
-  express.static(path.join(process.cwd(), "uploads"))
+  // 👇 Այստեղ արդեն նույն UPLOAD_DIR-ն ենք օգտագործում
+  express.static(UPLOAD_DIR)
 );
 
 /* ================== API 404 ================== */
@@ -175,4 +180,5 @@ app.listen(PORT, () => {
   console.log(
     `🔧 trust proxy: ${TRUST_PROXY_ENABLED ? "enabled (1)" : "disabled (0)"}`
   );
+  console.log(`💾 Upload dir: ${UPLOAD_DIR}`);
 });

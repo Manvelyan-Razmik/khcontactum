@@ -520,10 +520,12 @@
   }
 }
 
-
-
-@media (max-width: 480px) {
-  .icons-dzev1 span {
-    font-size: 11.5px;
+/* ========================== NEW: responsive labels 11.5px ========================== */
+@media (max-width: 560px) {
+  .grid .label,
+  .icons-dzev2 .label,
+  .icons-dzev3 .label {
+    font-size: 11.5px !important;
+    line-height: 1.2;
   }
 }

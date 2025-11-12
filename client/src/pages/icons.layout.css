@@ -523,7 +523,7 @@
 
 
 @media (max-width: 480px) {
-  .icons-dzev1 .label {
+  .icons-dzev1 span {
     font-size: 11.5px;
   }
 }

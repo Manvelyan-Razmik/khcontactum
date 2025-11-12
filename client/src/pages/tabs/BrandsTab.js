@@ -756,7 +756,7 @@ export default function BrandsTab({ langs, uiLang = "am" }) {
       .tag{ font-size:12px; font-weight:700; opacity:.7; }
 
       .admin-brands{ display:flex; flex-direction:column; gap:12px; }
-      .card{ background:#fff; border:1px solid #ececec; border-radius:16px; padding:12px; box-shadow:0 1px 4px rgba(0,0,0,.04); }
+      .card{ background:#fff; border:1px solid #ececec; border-radius:16px; padding:12px; }
       .brand-row{ display:grid; grid-template-columns:84px 1fr; gap:12px; }
       @media (max-width:520px){ .brand-row{ grid-template-columns:64px 1fr; } }
       .brand-logo{ width:84px; height:84px; border-radius:16px; overflow:hidden; background:#f2f2f2; display:grid; place-items:center; }
@@ -778,7 +778,6 @@ export default function BrandsTab({ langs, uiLang = "am" }) {
         overscroll-behavior:contain;
         background:#fff;
         border-radius:14px;
-        box-shadow:0 10px 30px rgba(0,0,0,.15);
         padding:6px 0;
         min-width:220px;
       }

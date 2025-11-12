@@ -575,7 +575,7 @@ export default function HomePage({ cardId = "101" }) {
                     className: "hero-desc",
                     style: {
                       ...descStyle,
-                      textShadow: "0 0 4px rgba(255,255,255,0.7)",
+                  
                     },
                     lang,
                     dir: lang === "ar" ? "rtl" : "ltr",

@@ -129,7 +129,7 @@ function pickLang(v, lang, fallbacks = ["hy", "en", "ru", "ar", "fr"]) {
 }
 
 /* =========================
-   ROBUST AUTOPLAY VIDEO LOOP
+   ROBUST AUTOPLAY VIDEO LOOP (no touch listeners)
    ========================= */
 function VideoLoop({ src, style }) {
   const videoRef = React.useRef(null);
@@ -138,73 +138,57 @@ function VideoLoop({ src, style }) {
     const v = videoRef.current;
     if (!v || !src) return;
 
-    // iOS / mobile safe attributes (must be real attributes, not only props)
-    v.muted = true;
-    v.setAttribute("muted", "");
-    v.playsInline = true;
-    v.setAttribute("playsinline", "");
-    v.autoplay = true;
-    v.setAttribute("autoplay", "");
-    v.loop = true; // defensive (we also manually loop)
-    v.setAttribute("loop", "");
+    // Required attributes for mobile autoplay
+    v.muted = true;                v.setAttribute("muted", "");
+    v.playsInline = true;          v.setAttribute("playsinline", "");
+    v.autoplay = true;             v.setAttribute("autoplay", "");
+    v.loop = true;                 v.setAttribute("loop", "");
     v.controls = false;
 
-    // try play helper
-    const safePlay = () => {
+    let killed = false;
+    // resilient play attempts
+    const tryPlay = () => {
+      if (killed) return;
       const p = v.play?.();
-      if (p && p.catch) p.catch(() => {});
+      if (p && p.catch) p.catch(() => {
+        // retry softly after a frame & after a short delay
+        if (!killed) requestAnimationFrame(() => setTimeout(tryPlay, 120));
+      });
     };
 
-    // intersection observer — resume whenever visible again
+    const onCanPlay = () => tryPlay();
+    const onEnded   = () => { v.currentTime = 0; tryPlay(); };
+    const onPause   = () => {
+      if (!killed && document.visibilityState === "visible") tryPlay();
+    };
+    const onVisibility = () => {
+      if (!killed && document.visibilityState === "visible") tryPlay();
+    };
+
+    // IntersectionObserver: resume when visible
     let io = null;
     if ("IntersectionObserver" in window) {
       io = new IntersectionObserver((entries) => {
-        entries.forEach((en) => {
-          if (en.isIntersecting) safePlay();
-        });
+        entries.forEach((en) => { if (en.isIntersecting) tryPlay(); });
       }, { threshold: 0.05 });
       io.observe(v);
     }
 
-    // user-gesture unlock for strict mobiles (first touch)
-    const onFirstTouch = () => {
-      safePlay();
-      window.removeEventListener("touchstart", onFirstTouch, { passive: true });
-    };
-    window.addEventListener("touchstart", onFirstTouch, { passive: true });
-
-    const onCanPlay = () => safePlay();
-    const onEnded   = () => { v.currentTime = 0; safePlay(); };
-    const onPause   = () => {
-      // If paused unexpectedly while visible, resume
-      if (document.visibilityState === "visible") safePlay();
-    };
-    const onVisibility = () => {
-      if (document.visibilityState === "visible") safePlay();
-    };
-    const onPageShow = () => safePlay();
-    const onPageHide = () => { /* keep currentTime, resume on show */ };
-
-    // initial attempt
-    safePlay();
+    // first attempt
+    tryPlay();
 
     v.addEventListener("canplay", onCanPlay);
     v.addEventListener("ended", onEnded);
     v.addEventListener("pause", onPause);
-
     document.addEventListener("visibilitychange", onVisibility);
-    window.addEventListener("pageshow", onPageShow);
-    window.addEventListener("pagehide", onPageHide);
 
     return () => {
+      killed = true;
       if (io) io.disconnect();
-      window.removeEventListener("touchstart", onFirstTouch, { passive: true });
       v.removeEventListener("canplay", onCanPlay);
       v.removeEventListener("ended", onEnded);
       v.removeEventListener("pause", onPause);
       document.removeEventListener("visibilitychange", onVisibility);
-      window.removeEventListener("pageshow", onPageShow);
-      window.removeEventListener("pagehide", onPageHide);
     };
   }, [src]);
 
@@ -401,7 +385,6 @@ export default function HomePage({ cardId = "101" }) {
               src: absSrc(bg.videoUrl),
               muted: true, playsInline: true, loop: true, autoPlay: true,
               preload: "auto", disableRemotePlayback: true,
-              // ensure attributes for iOS too
               ref: (el) => {
                 if (!el) return;
                 el.muted = true;
@@ -409,6 +392,9 @@ export default function HomePage({ cardId = "101" }) {
                 el.setAttribute("playsinline", "");
                 el.setAttribute("autoplay", "");
                 el.setAttribute("loop", "");
+                // փորձել անմիջապես նվագարկել
+                const p = el.play?.();
+                if (p && p.catch) p.catch(() => {});
               },
               style: { width: "100%", height: "100%", objectFit: "cover" },
             })

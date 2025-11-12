@@ -16,6 +16,8 @@ const h = React.createElement;
 /* ===== i18n text ===== */
 const TEXT = {
   am: {
+    qrTitle: "QR կոդ",
+    qrDesc: "Սկանավորմամբ բացեք իմ վիզիտ քարտը կամ պահեք կոնտակտների մեջ։",
     scanBtn: "Սկանավորել QR կոդը",
     shareTitle: "Կիսվել իմ քարտով",
     addBtn: "ԱՎԵԼԱՑՐԵՔ ԻՆՁ ԿՈՆՏԱԿՏՆԵՐԻ ՑԱՆԿՈՒՄ",
@@ -24,6 +26,8 @@ const TEXT = {
     offlineNote: "Սկանելուց հետո կարող եք պահպանել կոնտակտի մեջ։",
   },
   ru: {
+    qrTitle: "QR-код",
+    qrDesc: "Отсканируйте, чтобы открыть мою визитку или сохранить контакт.",
     scanBtn: "СКАНИРОВАТЬ QR-КОД",
     shareTitle: "ПОДЕЛИТЬСЯ МОЕЙ ВИЗИТКОЙ",
     addBtn: "ДОБАВИТЬ В КОНТАКТЫ",
@@ -32,6 +36,8 @@ const TEXT = {
     offlineNote: "После сканирования можно сохранить в контактах.",
   },
   en: {
+    qrTitle: "QR Code",
+    qrDesc: "Scan to open my card or save the contact.",
     scanBtn: "SCAN QR CODE",
     shareTitle: "SHARE MY CARD",
     addBtn: "ADD ME TO THE CONTACT LIST",
@@ -40,6 +46,8 @@ const TEXT = {
     offlineNote: "After scanning you can save it to your contacts.",
   },
   ar: {
+    qrTitle: "رمز QR",
+    qrDesc: "امسح لفتح بطاقتي أو حفظ جهة الاتصال.",
     scanBtn: "مسح رمز QR",
     shareTitle: "مشاركة بطاقتي",
     addBtn: "إضافتي إلى قائمة جهات الاتصال",
@@ -48,6 +56,8 @@ const TEXT = {
     offlineNote: "بعد المسح يمكنك حفظه في جهات الاتصال.",
   },
   fr: {
+    qrTitle: "Code QR",
+    qrDesc: "Scannez pour ouvrir ma carte ou enregistrer le contact.",
     scanBtn: "SCANNER LE QR CODE",
     shareTitle: "PARTAGER MA CARTE",
     addBtn: "M’AJOUTER À LA LISTE DE CONTACTS",
@@ -92,13 +102,21 @@ function defaultOnlineUrl(cardId) {
   return origin.replace(/\/+$/, "") + "/arm/card-" + (cardId || "100001") + "--.html";
 }
 
-// CRLF պարտադիր մի շարք կոնտակտ-կլայենտների համար (iOS/Outlook և այլն)
+/* ---------- small UA helpers ---------- */
+function isIOS() {
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent || navigator.vendor || "";
+  return /iPad|iPhone|iPod/.test(ua) || (/\bMacintosh\b/.test(ua) && "ontouchend" in window);
+}
+
+/* CRLF պարտադիր մի շարք կոնտակտ-կլայենտների համար (iOS/Outlook և այլն) */
 function buildVCard(name, phone) {
   const safeName = (name || "").trim() || "KHContactum";
   const safePhone = (phone || "").trim();
   const lines = [
     "BEGIN:VCARD",
     "VERSION:3.0",
+    // family;given;additional;prefix;suffix — թողնում ենք simple
     "N:" + safeName + ";;;;",
     "FN:" + safeName,
   ];
@@ -181,59 +199,39 @@ function ShareIcon({ kind, onClick }) {
 }
 
 /* =========
-   vCard saver — չի թողնում «դուրս թռնել» էջից
+   vCard saver — անմիջապես բերում է կոնտակտի preview-ը,
+   չի բացում share sheet և չի տանում էջից դուրս
    ========= */
 async function saveVCardUniversal({ name, phone, fileName = "contact.vcf" }) {
   const vcard = buildVCard(name, phone);
-  const blob = new Blob([vcard], { type: "text/vcard;charset=utf-8" });
-  const file = new File([blob], fileName, { type: "text/vcard" });
+  const blob = new Blob([vcard], { type: "text/x-vcard;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
 
-  // 1) Web Share Level 2 with files → Contacts sheet (iOS/Android նոր տարբերակներ)
-  try {
-    if (typeof navigator !== "undefined" &&
-        navigator.share &&
-        typeof navigator.canShare === "function" &&
-        navigator.canShare({ files: [file] })) {
-      await navigator.share({
-        title: "KHContactum",
-        text: "Save my contact",
-        files: [file],
-      });
-      return;
-    }
-  } catch (_) {}
+  // ❗ ՄԻ ՕԳՏԱԳՈՐԾԵԼ navigator.share({ files }) — դա է բացում share sheet-ը
+  // Safari/iOS-ում՝ ուղղակի download՝ բացում է Contacts preview-ը որպես տեղային դիալոգ
 
-  // 2) Legacy Edge / IE
   try {
-    if (window.navigator && typeof window.navigator.msSaveOrOpenBlob === "function") {
-      window.navigator.msSaveOrOpenBlob(blob, fileName);
-      return;
-    }
-  } catch (_) {}
-
-  // 3) Սովորական download՝ առանց նոր թաբի և առանց էջից դուրս գալու
-  try {
-    const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = fileName;       // ⬅ պարտադրում է save/open dialog
+    a.download = fileName;   // պարտադրում է save/open dialog / preview
     a.style.display = "none";
     document.body.appendChild(a);
-    a.click();                   // ⬅ չի բացում նոր թաբ
+    a.click();               // չի թողնում էջը, բերում է preview
     setTimeout(() => {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    }, 400);
+    }, 800);
     return;
-  } catch (_) {}
-
-  // 4) Վերջնական fallback — data: URL (կարող է բացել preview նոր թաբում, միայն եթե վերևները հնարավոր չեղան)
-  try {
-    const encoded = encodeURIComponent(vcard);
-    const dataUrl = "data:text/x-vcard;charset=utf-8," + encoded;
-    window.open(dataUrl, "_blank", "noopener,noreferrer");
-    return;
-  } catch (_) {}
+  } catch (_) {
+    // fallback — data URL (վերջին տարբերակ)
+    try {
+      const encoded = encodeURIComponent(vcard);
+      const dataUrl = "data:text/x-vcard;charset=utf-8," + encoded;
+      // iOS-ի համար same-tab open-ը կարող է նախընտրելի լինել preview-ի համար,
+      // սակայն սա արդեն կարող է «թողնել» էջը, ուստի պահում ենք որպես վերջին տարբերակ.
+      window.open(dataUrl, "_blank", "noopener,noreferrer");
+    } catch (_) {}
+  }
 }
 
 /**
@@ -273,11 +271,8 @@ export default function SharePage({ info, cardId, lang }) {
     const url = onlineUrl || (typeof window !== "undefined" ? window.location.href : "");
     if (!url) return;
 
-    // Instagram — mobile share API
     if (kind === "ig" && typeof navigator !== "undefined" && navigator.share) {
-      navigator
-        .share({ title: "KHContactum", text: shareText, url })
-        .catch(() => {});
+      navigator.share({ title: "KHContactum", text: shareText, url }).catch(() => {});
       return;
     }
 
@@ -298,9 +293,7 @@ export default function SharePage({ info, cardId, lang }) {
   }
 
   function currentQrValue() {
-    if (qrMode === "offline") {
-      return buildVCard(offlineName, offlinePhone);
-    }
+    if (qrMode === "offline") return buildVCard(offlineName, offlinePhone);
     return onlineUrl;
   }
 
@@ -315,26 +308,16 @@ export default function SharePage({ info, cardId, lang }) {
   const qrValue = currentQrValue();
   const encodedQr = encodeURIComponent(qrValue);
   const qrImgSrc =
-    "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" +
-    encodedQr;
+    "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" + encodedQr;
 
   return h(
     "section",
-    {
-      style: {
-        marginTop: 24,
-        marginBottom: 24,
-        textAlign: "center",
-      },
-    },
+    { style: { marginTop: 24, marginBottom: 24, textAlign: "center" } },
 
     h("h2", { style: { marginBottom: 4 } }, t.qrTitle),
     h(
       "p",
-      {
-        className: "small",
-        style: { marginBottom: 16, maxWidth: 360, marginInline: "auto" },
-      },
+      { className: "small", style: { marginBottom: 16, maxWidth: 360, marginInline: "auto" } },
       t.qrDesc
     ),
 
@@ -357,13 +340,7 @@ export default function SharePage({ info, cardId, lang }) {
 
     h(
       "h3",
-      {
-        style: {
-          margin: "0 0 10px",
-          fontSize: 16,
-          color: shareTitleColor,
-        },
-      },
+      { style: { margin: "0 0 10px", fontSize: 16, color: shareTitleColor } },
       t.shareTitle
     ),
 
@@ -379,11 +356,7 @@ export default function SharePage({ info, cardId, lang }) {
         },
       },
       enabledKinds.map((kind) =>
-        h(ShareIcon, {
-          key: kind,
-          kind,
-          onClick: () => onShare(kind),
-        })
+        h(ShareIcon, { key: kind, kind, onClick: () => onShare(kind) })
       )
     ),
 
@@ -422,13 +395,7 @@ export default function SharePage({ info, cardId, lang }) {
           "div",
           {
             className: "card",
-            style: {
-              position: "relative",
-              maxWidth: 360,
-              width: "90%",
-              padding: 16,
-              textAlign: "center",
-            },
+            style: { position: "relative", maxWidth: 360, width: "90%", padding: 16, textAlign: "center" },
             onClick: (e) => e.stopPropagation(),
           },
 
@@ -452,23 +419,13 @@ export default function SharePage({ info, cardId, lang }) {
 
           h(
             "div",
-            {
-              style: {
-                display: "flex",
-                gap: 8,
-                marginBottom: 12,
-              },
-            },
+            { style: { display: "flex", gap: 8, marginBottom: 12 } },
             h(
               "button",
               {
                 type: "button",
                 className: "btn",
-                style: {
-                  flex: 1,
-                  background: qrMode === "online" ? "#111" : "#eee",
-                  color: qrMode === "online" ? "#fff" : "#111",
-                },
+                style: { flex: 1, background: qrMode === "online" ? "#111" : "#eee", color: qrMode === "online" ? "#fff" : "#111" },
                 onClick: () => setQrMode("online"),
               },
               t.qrOnline
@@ -478,11 +435,7 @@ export default function SharePage({ info, cardId, lang }) {
               {
                 type: "button",
                 className: "btn",
-                style: {
-                  flex: 1,
-                  background: qrMode === "offline" ? "#111" : "#eee",
-                  color: qrMode === "offline" ? "#fff" : "#111",
-                },
+                style: { flex: 1, background: qrMode === "offline" ? "#111" : "#eee", color: qrMode === "offline" ? "#fff" : "#111" },
                 onClick: () => setQrMode("offline"),
               },
               t.qrOffline
@@ -497,11 +450,7 @@ export default function SharePage({ info, cardId, lang }) {
           }),
 
           qrMode === "offline" &&
-            h(
-              "div",
-              { className: "small", style: { marginTop: 4 } },
-              t.offlineNote
-            )
+            h("div", { className: "small", style: { marginTop: 4 } }, t.offlineNote)
         )
       )
   );

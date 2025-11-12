@@ -16,8 +16,6 @@ const h = React.createElement;
 /* ===== i18n text ===== */
 const TEXT = {
   am: {
-    qrTitle: "QR կոդ",
-    qrDesc: "Սկանավորմամբ բացեք իմ վիզիտ քարտը կամ պահեք կոնտակտների մեջ։",
     scanBtn: "Սկանավորել QR կոդը",
     shareTitle: "Կիսվել իմ քարտով",
     addBtn: "ԱՎԵԼԱՑՐԵՔ ԻՆՁ ԿՈՆՏԱԿՏՆԵՐԻ ՑԱՆԿՈՒՄ",
@@ -26,8 +24,6 @@ const TEXT = {
     offlineNote: "Սկանելուց հետո կարող եք պահպանել կոնտակտի մեջ։",
   },
   ru: {
-    qrTitle: "QR-код",
-    qrDesc: "Отсканируйте, чтобы открыть мою визитку или сохранить контакт.",
     scanBtn: "СКАНИРОВАТЬ QR-КОД",
     shareTitle: "ПОДЕЛИТЬСЯ МОЕЙ ВИЗИТКОЙ",
     addBtn: "ДОБАВИТЬ В КОНТАКТЫ",
@@ -36,8 +32,6 @@ const TEXT = {
     offlineNote: "После сканирования можно сохранить в контактах.",
   },
   en: {
-    qrTitle: "QR Code",
-    qrDesc: "Scan to open my card or save the contact.",
     scanBtn: "SCAN QR CODE",
     shareTitle: "SHARE MY CARD",
     addBtn: "ADD ME TO THE CONTACT LIST",
@@ -46,8 +40,6 @@ const TEXT = {
     offlineNote: "After scanning you can save it to your contacts.",
   },
   ar: {
-    qrTitle: "رمز QR",
-    qrDesc: "امسح لفتح بطاقتي أو حفظ جهة الاتصال.",
     scanBtn: "مسح رمز QR",
     shareTitle: "مشاركة بطاقتي",
     addBtn: "إضافتي إلى قائمة جهات الاتصال",
@@ -56,8 +48,6 @@ const TEXT = {
     offlineNote: "بعد المسح يمكنك حفظه في جهات الاتصال.",
   },
   fr: {
-    qrTitle: "Code QR",
-    qrDesc: "Scannez pour ouvrir ma carte ou enregistrer le contact.",
     scanBtn: "SCANNER LE QR CODE",
     shareTitle: "PARTAGER MA CARTE",
     addBtn: "M’AJOUTER À LA LISTE DE CONTACTS",

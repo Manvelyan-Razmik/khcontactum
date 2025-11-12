@@ -13,6 +13,18 @@ import igIcon    from "../img/insta.png";
 
 const h = React.createElement;
 
+/* ===== helpers ===== */
+function pickLang(v, lang, fallbacks = ["am", "en", "ru", "ar", "fr"]) {
+  if (!v) return "";
+  if (typeof v === "string") return v;
+  const order = [lang, ...fallbacks.filter((x) => x !== lang)];
+  for (const k of order) {
+    const s = v?.[k];
+    if (s && String(s).trim()) return String(s).trim();
+  }
+  return "";
+}
+
 /* ===== i18n text ===== */
 const TEXT = {
   am: {
@@ -21,7 +33,12 @@ const TEXT = {
     addBtn: "ԱՎԵԼԱՑՐԵՔ ԻՆՁ ԿՈՆՏԱԿՏՆԵՐԻ ՑԱՆԿՈՒՄ",
     qrOnline: "ONLINE QR-CODE",
     qrOffline: "OFFLINE QR-CODE",
-    offlineNote: "Սկանելուց հետո կարող եք պահպանել կոնտակտի մեջ։",
+    offlineNote: "Սկանելուց հետո կարող եք պահպանել կոնտակտների մեջ։",
+    qrTitle: "Իմ քարտի QR-կոդը",
+    qrDesc: "Ընտրեք օնլայն կամ օֆլայն տարբերակը՝ սկանելու համար։",
+    // share defaults
+    shareDefault: "Դիտիր իմ KHContactum.com թվային քարտը։",
+    mailSubject: "KHContactum թվային քարտ",
   },
   ru: {
     scanBtn: "СКАНИРОВАТЬ QR-КОД",
@@ -30,6 +47,10 @@ const TEXT = {
     qrOnline: "ОНЛАЙН QR-КОД",
     qrOffline: "ОФЛАЙН QR-КОД",
     offlineNote: "После сканирования можно сохранить в контактах.",
+    qrTitle: "QR-код моей визитки",
+    qrDesc: "Выберите онлайн или офлайн вариант для сканирования.",
+    shareDefault: "Посмотри мою цифровую карточку KHContactum.com.",
+    mailSubject: "Цифровая визитка KHContactum",
   },
   en: {
     scanBtn: "SCAN QR CODE",
@@ -38,6 +59,10 @@ const TEXT = {
     qrOnline: "ONLINE QR-CODE",
     qrOffline: "OFFLINE QR-CODE",
     offlineNote: "After scanning you can save it to your contacts.",
+    qrTitle: "QR code of my card",
+    qrDesc: "Choose online or offline mode to scan.",
+    shareDefault: "Check out my KHContactum.com digital card.",
+    mailSubject: "KHContactum digital card",
   },
   ar: {
     scanBtn: "مسح رمز QR",
@@ -46,6 +71,10 @@ const TEXT = {
     qrOnline: "رمز QR عبر الإنترنت",
     qrOffline: "رمز QR بدون اتصال",
     offlineNote: "بعد المسح يمكنك حفظه في جهات الاتصال.",
+    qrTitle: "رمز QR لبطاقتي",
+    qrDesc: "اختر الوضع المتصل أو غير المتصل للمسح.",
+    shareDefault: "اطّلع على بطاقتي الرقمية على KHContactum.com.",
+    mailSubject: "بطاقة KHContactum الرقمية",
   },
   fr: {
     scanBtn: "SCANNER LE QR CODE",
@@ -54,6 +83,10 @@ const TEXT = {
     qrOnline: "QR-CODE EN LIGNE",
     qrOffline: "QR-CODE HORS LIGNE",
     offlineNote: "Après le scan vous pouvez l’enregistrer dans vos contacts.",
+    qrTitle: "QR code de ma carte",
+    qrDesc: "Choisissez le mode en ligne ou hors ligne pour scanner.",
+    shareDefault: "Découvrez ma carte numérique KHContactum.com.",
+    mailSubject: "Carte numérique KHContactum",
   },
 };
 
@@ -74,7 +107,8 @@ function normalizeShare(raw) {
     offlineFullName: (s.offlineFullName || "").toString().trim(),
     offlinePhone: (s.offlinePhone || "").toString().trim(),
     quick: Object.assign({}, DEFAULT_QUICK, s.quick || {}),
-    shareText: (s.shareText || "").toString().trim(),
+    // shareText կարող է լինել string կամ {am,ru,en,ar,fr} օբյեկտ — պահում ենք ինչպես կա
+    shareText: s.shareText || "",
     styles: {
       btnTextColor: (s.styles && s.styles.btnTextColor) || "#ffffff",
       btnBgColor:   (s.styles && s.styles.btnBgColor)   || "#000000",
@@ -106,7 +140,6 @@ function buildVCard(name, phone) {
   const lines = [
     "BEGIN:VCARD",
     "VERSION:3.0",
-    // family;given;additional;prefix;suffix — թողնում ենք simple
     "N:" + safeName + ";;;;",
     "FN:" + safeName,
   ];
@@ -128,7 +161,7 @@ const SHARE_ICON_META = {
   ig:   { label: "Instagram", img: igIcon },
 };
 
-function buildShareUrl(kind, url, text) {
+function buildShareUrl(kind, url, text, mailSubject) {
   const msg = (text ? text + " " : "") + url;
   const encUrl  = encodeURIComponent(url);
   const encText = encodeURIComponent(text || "");
@@ -146,7 +179,7 @@ function buildShareUrl(kind, url, text) {
     case "mail":
       return (
         "mailto:?subject=" +
-        encodeURIComponent("KHContactum digital card") +
+        encodeURIComponent(mailSubject || "KHContactum digital card") +
         "&body=" +
         encBoth
       );
@@ -197,28 +230,22 @@ async function saveVCardUniversal({ name, phone, fileName = "contact.vcf" }) {
   const blob = new Blob([vcard], { type: "text/x-vcard;charset=utf-8" });
   const url = URL.createObjectURL(blob);
 
-  // ❗ ՄԻ ՕԳՏԱԳՈՐԾԵԼ navigator.share({ files }) — դա է բացում share sheet-ը
-  // Safari/iOS-ում՝ ուղղակի download՝ բացում է Contacts preview-ը որպես տեղային դիալոգ
-
   try {
     const a = document.createElement("a");
     a.href = url;
-    a.download = fileName;   // պարտադրում է save/open dialog / preview
+    a.download = fileName;
     a.style.display = "none";
     document.body.appendChild(a);
-    a.click();               // չի թողնում էջը, բերում է preview
+    a.click();
     setTimeout(() => {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     }, 800);
     return;
   } catch (_) {
-    // fallback — data URL (վերջին տարբերակ)
     try {
       const encoded = encodeURIComponent(vcard);
       const dataUrl = "data:text/x-vcard;charset=utf-8," + encoded;
-      // iOS-ի համար same-tab open-ը կարող է նախընտրելի լինել preview-ի համար,
-      // սակայն սա արդեն կարող է «թողնել» էջը, ուստի պահում ենք որպես վերջին տարբերակ.
       window.open(dataUrl, "_blank", "noopener,noreferrer");
     } catch (_) {}
   }
@@ -245,9 +272,18 @@ export default function SharePage({ info, cardId, lang }) {
   const offlineName = share.offlineFullName || info?.company?.name?.en || "";
   const offlinePhone = share.offlinePhone || "";
 
-  const shareText =
-    share.shareText ||
-    "Check out my KHContactum digital card…";
+  // === shareText լուծարում՝ բազմալեզու աջակցությամբ ===
+  const shareText = (() => {
+    const raw = share.shareText;
+    if (raw && typeof raw === "object") {
+      const s = pickLang(raw, activeLang);
+      if (s) return s;
+    } else {
+      const s = String(raw || "").trim();
+      if (s) return s;
+    }
+    return t.shareDefault; // fallback ըստ լեզվի
+  })();
 
   // գույներ admin-ից
   const btnTextColor    = share.styles.btnTextColor    || "#ffffff";
@@ -266,12 +302,12 @@ export default function SharePage({ info, cardId, lang }) {
       return;
     }
 
-    const href = buildShareUrl(kind, url, shareText);
+    const href = buildShareUrl(kind, url, shareText, t.mailSubject);
 
     if (href.startsWith("http")) {
       window.open(href, "_blank", "noopener,noreferrer");
     } else {
-      // viber://, mailto: — բացվում է նոր կոնտեքստում, SPA-ն մնում է տեղում
+      // viber://, mailto:
       const a = document.createElement("a");
       a.href = href;
       a.target = "_blank";

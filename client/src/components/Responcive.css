@@ -704,63 +704,6 @@
   }
 }
 
-/* ===== 1920px և ներքև – մեծ մոնիտորներ (Full HD, 2K) ===== */
-@media (max-width: 1920px) {
-  body {
-    font-size: 17px;
-  }
-  .public-home .card {
-    max-width: 1100px;
-    margin: 0 auto 24px auto;
-  }
-}
-
-/* ===== 1440px և ներքև – լայն laptop էկրաններ ===== */
-@media (max-width: 1440px) {
-  body {
-    font-size: 16px;
-  }
-  .public-home .card {
-    max-width: 960px;
-  }
-  .hero-title {
-    font-size: 34px;
-  }
-}
-
-/* ===== 1366px և ներքև – ստանդարտ notebook էկրաններ ===== */
-@media (max-width: 1366px) {
-  body {
-    font-size: 15px;
-  }
-  .public-home .card {
-    max-width: 880px;
-  }
-  .hero-title {
-    font-size: 32px;
-  }
-  .hero-desc {
-    font-size: 16px;
-  }
-}
-
-/* ===== 1280px և ներքև – փոքր laptop / tablet landscape ===== */
-@media (max-width: 1280px) {
-  body {
-    font-size: 14px;
-  }
-  .public-home .card {
-    max-width: 820px;
-  }
-  .hero-title {
-    font-size: 30px;
-  }
-  .hero-desc {
-    font-size: 15px;
-    max-width: 90%;
-  }
-}
-
 /* Armenian-friendly font stack */
 @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Armenian:wght@400;600;700&display=swap");
 
@@ -812,5 +755,466 @@
   .icons-dzev3 .label {
     font-size: 11.5px !important;
     line-height: 1.2;
+  }
+}
+
+
+/* ===========================
+   Desktop-only (1280 / 1366 / 1440 / 1920)
+   =========================== */
+
+/* Base desktop fallback */
+.public-scroll-layer { padding: 16px; }
+.public-home .card { padding: 18px 20px 22px; border-radius: 16px; }
+.public-home .hero-title { font-size: 34px; line-height: 1.15; margin: 14px 0 6px; }
+.public-home .hero-desc  { font-size: 16px; line-height: 1.6; max-width: 72ch; }
+
+/* ===== 1280–1365 ===== */
+@media (min-width: 1280px) and (max-width: 1365.98px) {
+  .public-scroll-layer { padding: 18px; }
+  .public-home .card { padding: 18px 20px 22px; }
+  .public-home .hero-title { font-size: 34px; }
+  .public-home .hero-desc  { font-size: 16px; max-width: 70ch; }
+}
+
+/* ===== 1366–1439 ===== */
+@media (min-width: 1366px) and (max-width: 1439.98px) {
+  .public-scroll-layer { padding: 20px; }
+  .public-home .card { padding: 20px 22px 24px; }
+  .public-home .hero-title { font-size: 36px; }
+  .public-home .hero-desc  { font-size: 17px; max-width: 72ch; }
+}
+
+/* ===== 1440–1919 ===== */
+@media (min-width: 1440px) and (max-width: 1919.98px) {
+  .public-scroll-layer { padding: 22px; }
+  .public-home .card { padding: 22px 24px 26px; }
+  .public-home .hero-title { font-size: 40px; }
+  .public-home .hero-desc  { font-size: 18px; max-width: 76ch; }
+}
+
+/* ===== ≥1920 ===== */
+@media (min-width: 1920px) {
+  .public-scroll-layer {
+    padding: 24px;
+    /* content-ը մի քիչ նեղ՝ գեղագիտական միջնամաս */
+    max-width: 1440px;
+    margin: 0 auto;
+  }
+  .public-home .card { padding: 24px 26px 28px; }
+  .public-home .hero-title { font-size: 44px; }
+  .public-home .hero-desc  { font-size: 19px; max-width: 80ch; }
+}
+
+/* —— օժանդակ մանր կարգավորումներ մեծ էկրանների համար —— */
+@media (min-width: 1440px) {
+  /* եթե toolbar/գլխամաս ունես */
+  .toolbar { gap: 12px; }
+}
+
+/* ցանկության դեպքում՝ cards-ին փոքր ստվեր desktop-ում */
+@media (min-width: 1280px) {
+  .public-home .card { box-shadow: 0 8px 28px rgba(0,0,0,.08); }
+}
+
+/* ========= Desktop-only for IconsPage (1280 / 1366 / 1440 / 1920) ========= */
+
+/* Base desktop fallback */
+:root {
+  --icons-cols: 4;
+  --icon-size: 56px;
+  --icon-gap: 14px;
+  --label-size: 14px;
+  --orbit-radius: 180px;
+}
+
+/* ընդհանուր կառուցվածք */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--icons-cols, 4), minmax(0, 1fr));
+  gap: var(--icon-gap, 14px);
+}
+.icons-nowrap { align-items: start; }
+
+.icon-btn {
+  width: var(--icon-size, 56px);
+  height: var(--icon-size, 56px);
+  border-radius: 9999px;
+  display: grid;
+  place-items: center;
+}
+
+.label {
+  font-size: var(--label-size, 14px);
+  line-height: 1.25;
+}
+
+/* ===== 1280–1365 ===== */
+@media (min-width: 1280px) and (max-width: 1365.98px) {
+  :root {
+    --icons-cols: 4;
+    --icon-size: 58px;
+    --icon-gap: 14px;
+    --label-size: 14px;
+    --orbit-radius: 190px;
+  }
+}
+
+/* ===== 1366–1439 ===== */
+@media (min-width: 1366px) and (max-width: 1439.98px) {
+  :root {
+    --icons-cols: 5;
+    --icon-size: 60px;
+    --icon-gap: 16px;
+    --label-size: 15px;
+    --orbit-radius: 200px;
+  }
+}
+
+/* ===== 1440–1919 ===== */
+@media (min-width: 1440px) and (max-width: 1919.98px) {
+  :root {
+    --icons-cols: 6;
+    --icon-size: 64px;
+    --icon-gap: 18px;
+    --label-size: 16px;
+    --orbit-radius: 220px;
+  }
+  .icons-dzev3 .icon-btn .diamond { transform: scale(1.06); }
+}
+
+/* ===== ≥1920 ===== */
+@media (min-width: 1920px) {
+  :root {
+    --icons-cols: 7;
+    --icon-size: 68px;
+    --icon-gap: 20px;
+    --label-size: 17px;
+    --orbit-radius: 240px;
+  }
+  .icons-dzev3 .icon-btn .diamond { transform: scale(1.1); }
+}
+
+/* ===== dzev1 icon-ների փոքրացում 1366-ից սկսած եթե 4 հատ է ===== */
+@media (min-width: 1366px) {
+  .icons-dzev1.grid[style*="--icons-cols:4"],
+  .icons-dzev1.icons-cols-4 {
+    --icon-size: 52px;
+    --label-size: 13px;
+    --icon-gap: 14px;
+  }
+}
+@media (min-width: 1440px) {
+  .icons-dzev1.grid[style*="--icons-cols:4"],
+  .icons-dzev1.icons-cols-4 {
+    --icon-size: 55px;
+    --label-size: 14px;
+  }
+}
+
+/* row-card look երբ cols === 1 */
+.icons-cols-1 .grid-item,
+.icons-cols-1 .icon-wrap {
+  background: var(--icons-card-bg, #fff);
+  border: 1px solid var(--icons-card-border, rgba(0,0,0,.06));
+  border-radius: 14px;
+  padding: 10px 14px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 10px;
+}
+
+
+/* ========= BrandsPage — Desktop-only (1280 / 1366 / 1440 / 1920) ========= */
+
+/* Base desktop fallback */
+:root {
+  --brands-title-size: 26px;
+  --brands-title-mt: 16px;
+  --brands-title-mb: 28px;
+
+  --brands-gap: 16px;
+  --brand-circle: 90px;     /* logo-ի շրջանը grid-ում */
+  --brand-name: 13px;
+
+  --brand-row-circle: 60px; /* 1 սյուն (list/row) ռեժիմի շրջանը */
+  --brand-row-font: 15px;
+}
+
+/* ============ COMMON SELECTORS (override inline with !important) ============ */
+.brands-public .company-title {
+  font-size: var(--brands-title-size) !important;
+  margin: var(--brands-title-mt) 0 var(--brands-title-mb) !important;
+  line-height: 1.15;
+}
+
+/* Multi-column grid */
+.brands-public .brands-grid {
+  gap: var(--brands-gap) !important;
+  justify-content: center !important;
+}
+
+/* Grid card circle */
+.brands-public .brand-card > div:first-child {
+  width: var(--brand-circle) !important;
+  height: var(--brand-circle) !important;
+  border-radius: 50% !important;
+  overflow: hidden !important;
+  background: #111 !important;
+  display: grid !important;
+  place-items: center !important;
+}
+
+/* Grid name */
+.brands-public .brand-card > span {
+  margin-top: 8px !important;
+  font-size: var(--brand-name) !important;
+  line-height: 1.25 !important;
+  max-width: 160px !important;
+  text-align: center !important;
+}
+
+/* One-column/list mode */
+.brands-public .brand-item {
+  gap: 14px !important;
+  padding: 10px 12px !important;
+  border-radius: 14px !important;
+}
+
+.brands-public .brand-item > div:first-child {
+  width: var(--brand-row-circle) !important;
+  height: var(--brand-row-circle) !important;
+  border-radius: 50% !important;
+  overflow: hidden !important;
+  display: grid !important;
+  place-items: center !important;
+  background: #111 !important;
+}
+
+.brands-public .brand-item > span {
+  font-size: var(--brand-row-font) !important;
+  font-weight: 700 !important;
+}
+
+/* ========================= 1280–1365 ========================= */
+@media (min-width: 1280px) and (max-width: 1365.98px) {
+  :root {
+    --brands-title-size: 26px;
+    --brands-title-mt: 14px;
+    --brands-title-mb: 26px;
+
+    --brands-gap: 16px;
+    --brand-circle: 92px;
+    --brand-name: 13px;
+
+    --brand-row-circle: 60px;
+    --brand-row-font: 15px;
+  }
+}
+
+/* ========================= 1366–1439 ========================= */
+@media (min-width: 1366px) and (max-width: 1439.98px) {
+  :root {
+    --brands-title-size: 28px;
+    --brands-title-mt: 18px;
+    --brands-title-mb: 32px;
+
+    --brands-gap: 18px;
+    --brand-circle: 96px;
+    --brand-name: 14px;
+
+    --brand-row-circle: 62px;
+    --brand-row-font: 15px;
+  }
+}
+
+/* ========================= 1440–1919 ========================= */
+@media (min-width: 1440px) and (max-width: 1919.98px) {
+  :root {
+    --brands-title-size: 30px;
+    --brands-title-mt: 20px;
+    --brands-title-mb: 36px;
+
+    --brands-gap: 20px;
+    --brand-circle: 104px;
+    --brand-name: 15px;
+
+    --brand-row-circle: 64px;
+    --brand-row-font: 16px;
+  }
+}
+
+/* ========================= ≥1920 ========================= */
+@media (min-width: 1920px) {
+  :root {
+    --brands-title-size: 32px;
+    --brands-title-mt: 22px;
+    --brands-title-mb: 40px;
+
+    --brands-gap: 22px;
+    --brand-circle: 112px;
+    --brand-name: 16px;
+
+    --brand-row-circle: 68px;
+    --brand-row-font: 16px;
+  }
+
+  /* Կենտրոնացնել լայն էկրաններին */
+  .brands-public {
+    max-width: 1440px;
+    margin: 0 auto;
+  }
+}
+
+/* Թեթև hover-ը */
+.brands-public .brand-card:hover { transform: translateY(-2px); }
+.brands-public .brand-item:hover { transform: translateY(-1px); }
+
+
+/* ========= BrandInfoPage — Desktop-only (1280 / 1366 / 1440 / 1920) ========= */
+
+/* Base desktop fallback */
+:root{
+  --bi-pad:16px;
+  --bi-avatar:100px;
+  --bi-name:18px;
+  --bi-desc:14px;
+  --bi-desc-max:320px;
+  --bi-slide-h:190px;
+  --bi-slide-w:340px;
+  --bi-dot:8px;
+  --bi-btn-fs:13px;
+}
+
+/* ========= Common selectors (override inline with !important) ========= */
+.brandinfo-public{ padding:10px 12px !important; }
+
+.worker-card-public{ 
+  padding: var(--bi-pad) !important;
+  text-align:center !important;
+}
+
+.worker-card-public > div:first-child{
+  /* avatar wrap */
+  width: var(--bi-avatar) !important;
+  height: var(--bi-avatar) !important;
+  margin: 0 auto 10px !important;
+  border-radius:50% !important;
+  overflow:hidden !important;
+  display:grid !important;
+  place-items:center !important;
+}
+
+.worker-card-public h3{
+  margin: 4px 0 8px !important;
+  font-size: var(--bi-name) !important;
+  font-weight: 700 !important;
+}
+
+
+/* թիրախավորում ենք նկարագրության բլոկը՝ maxWidth/pad/fz override անելու համար */
+.worker-card-public > div[style*="maxWidth"]{
+  margin: 0 auto 14px !important;
+  max-width: var(--bi-desc-max) !important;
+  padding: 10px 12px !important;
+  border-radius:14px !important;
+  background:#fafafa !important;
+  font-size: var(--bi-desc) !important;
+  line-height:1.5 !important;
+  text-align:left !important;
+}
+
+/* slider container width */
+.worker-card-public > div[style*="maxWidth:340px"]{
+  margin:0 auto 12px !important;
+  max-width: var(--bi-slide-w) !important;
+}
+
+/* slide box height */
+.worker-card-public div[style*="borderRadius:18px"][style*="position:relative"]{
+  height: var(--bi-slide-h) !important;
+}
+
+/* dots size */
+.worker-card-public span[style*="borderRadius:50%"][style*="height:8px"]{
+  width: var(--bi-dot) !important;
+  height: var(--bi-dot) !important;
+}
+
+/* rating buttons font-size */
+.worker-card-public button[style*="borderRadius:999"]{
+  font-size: var(--bi-btn-fs) !important;
+}
+
+/* back header */
+.brandinfo-public .company-title{
+  font-size: 20px !important;
+  margin: 0 !important;
+}
+
+/* ========================= 1280–1365 ========================= */
+@media (min-width:1280px) and (max-width:1365.98px){
+  :root{
+    --bi-pad:16px;
+    --bi-avatar:104px;
+    --bi-name:18px;
+    --bi-desc:14px;
+    --bi-desc-max:360px;
+    --bi-slide-h:200px;
+    --bi-slide-w:360px;
+    --bi-dot:8px;
+    --bi-btn-fs:13px;
+  }
+}
+
+/* ========================= 1366–1439 ========================= */
+@media (min-width:1366px) and (max-width:1439.98px){
+  :root{
+    --bi-pad:18px;
+    --bi-avatar:110px;
+    --bi-name:19px;
+    --bi-desc:14px;
+    --bi-desc-max:380px;
+    --bi-slide-h:210px;
+    --bi-slide-w:380px;
+    --bi-dot:9px;
+    --bi-btn-fs:13.5px;
+  }
+}
+
+/* ========================= 1440–1919 ========================= */
+@media (min-width:1440px) and (max-width:1919.98px){
+  :root{
+    --bi-pad:20px;
+    --bi-avatar:116px;
+    --bi-name:20px;
+    --bi-desc:15px;
+    --bi-desc-max:400px;
+    --bi-slide-h:220px;
+    --bi-slide-w:400px;
+    --bi-dot:9px;
+    --bi-btn-fs:14px;
+  }
+}
+
+/* ========================= ≥1920 ========================= */
+@media (min-width:1920px){
+  :root{
+    --bi-pad:22px;
+    --bi-avatar:124px;
+    --bi-name:21px;
+    --bi-desc:15px;
+    --bi-desc-max:420px;
+    --bi-slide-h:230px;
+    --bi-slide-w:420px;
+    --bi-dot:10px;
+    --bi-btn-fs:14px;
+  }
+
+  /* content-ը կենտրոնացնել լայն էկրաններին */
+  .brandinfo-public{
+    max-width: 1440px;
+    margin: 0 auto;
   }
 }

@@ -2,15 +2,13 @@
 import React from "react";
 import { getPublicInfoByCardId, API } from "../api.js";
 import "./Responcive.css";
-
-import IconsPage     from "./IconsPage.js";
-import BrandsPage    from "./BrandsPage.js";
+import IconsPage from "./IconsPage.js";
+import BrandsPage from "./BrandsPage.js";
 import BrandInfoPage from "./BrandInfoPage.js";
-import SharePage     from "./SharePage.js";
+import SharePage from "./SharePage.js";
 
 const h = React.createElement;
 
-/* ------------ utils ------------ */
 function absSrc(u = "") {
   if (!u) return "";
   if (/^(data:|https?:\/\/|blob:)/i.test(u)) return u;
@@ -20,7 +18,6 @@ function absSrc(u = "") {
     const apiUrl = new URL(API);
     return `${apiUrl.origin}${path}`;
   } catch (e) {
-    console.warn("absSrc: bad API, fallback to window.origin", API, e);
     if (typeof window !== "undefined" && window.location?.origin) {
       return window.location.origin.replace(/\/$/, "") + path;
     }
@@ -32,29 +29,54 @@ function isVideo(u = "") {
   return /\.(mp4|webm|ogg)(\?.*)?$/i.test(u);
 }
 
-/* ---------- smarter soft-hyphenation for Armenian ---------- */
-function softHyphenate(text, lang = "hy") {
+function hyphenateHy(text, uiLang = "hy") {
   if (!text) return "";
-  const TOKENS = /(\bhttps?:\/\/\S+|\b\S+@\S+\.\S+|\b[\d._\-]+\b)/gi;
-  const STEP   = lang === "hy" ? 6 : 7;
-
-  return String(text)
+  const TOKENS = /(\bhttps?:\/\/\S+|\b\S+@\S+\.\S+|\b[\d._\-]+(?:\b|$))/gi;
+  const U_DIGR = "\uE000";
+  const toPh = (s) => s.replace(/ու/g, U_DIGR);
+  const fromPh = (s) => s.replace(new RegExp(U_DIGR, "g"), "ու");
+  const VOWEL = new Set(["ա","ե","է","ը","ի","ո","օ","և",U_DIGR]);
+  function hyphenateWord(w) {
+    if (!w) return w;
+    if (w.length < 6) return w;
+    let src = toPh(w);
+    const chars = Array.from(src);
+    const breaks = [];
+    const isV = (ch) => VOWEL.has(ch);
+    const isC = (ch) => !VOWEL.has(ch);
+    let lastBreak = -6;
+    for (let i = 0; i < chars.length - 2; i++) {
+      const a = chars[i], b = chars[i+1], c = chars[i+2];
+      let place = -1;
+      if (isV(a) && isC(b) && isV(c)) place = i + 1;
+      if (isV(a) && isC(b) && isC(c) && i+3 < chars.length && isV(chars[i+3])) place = i + 2;
+      if (place > 1 && place < chars.length - 2) {
+        if (place - lastBreak >= 6) {
+          breaks.push(place);
+          lastBreak = place;
+        }
+      }
+    }
+    for (let k = breaks.length - 1; k >= 0; k--) {
+      const at = breaks[k];
+      chars.splice(at, 0, "\u00AD");
+    }
+    return fromPh(chars.join(""));
+  }
+  const out = String(text)
     .split(TOKENS)
-    .map(chunk => {
-      if (TOKENS.test(chunk)) return chunk; // keep urls/emails/numbers
+    .map((chunk) => {
+      if (TOKENS.test(chunk)) { TOKENS.lastIndex = 0; return chunk; }
       TOKENS.lastIndex = 0;
-      // միայն շատ երկար հայերեն բառերի վրա
-      return chunk.replace(/[\p{Script=Armenian}]{10,}/gu, word => {
-        if (/\u00AD/.test(word)) return word;
-        return word.replace(new RegExp(`(.{${STEP}})(?=.)`, "g"), "$1\u00AD");
-      });
+      return chunk.replace(/[\p{Script=Armenian}]+/gu, hyphenateWord);
     })
     .join("");
+  return out.normalize("NFC");
 }
 
 function idealColsForLang(lang) {
   switch (lang) {
-    case "hy": return [30, 34]; // Armenian
+    case "hy": return [30, 34];
     case "ru": return [32, 38];
     case "en": return [36, 42];
     case "ar": return [30, 34];
@@ -63,7 +85,6 @@ function idealColsForLang(lang) {
   }
 }
 
-/* Լեզվի dropdown */
 function LangDropdown({ value, onChange, langs = ["am", "ru", "en"] }) {
   const [open, setOpen] = React.useState(false);
   React.useEffect(() => {
@@ -89,14 +110,12 @@ function LangDropdown({ value, onChange, langs = ["am", "ru", "en"] }) {
   );
 }
 
-/* rgba object -> css rgba() */
 function rgbaToCss(obj) {
   if (!obj || typeof obj !== "object") return "";
   const { r = 0, g = 0, b = 0, a = 1 } = obj;
   return `rgba(${(+r | 0)}, ${(+g | 0)}, ${(+b | 0)}, ${(isFinite(+a) ? +a : 1)})`;
 }
 
-/* i18n pick */
 function pickLang(v, lang, fallbacks = ["hy", "en", "ru", "ar", "fr"]) {
   if (!v) return "";
   if (typeof v === "string") return v;
@@ -109,16 +128,15 @@ function pickLang(v, lang, fallbacks = ["hy", "en", "ru", "ar", "fr"]) {
   return "";
 }
 
-/* ---- common video loop helper ---- */
 function VideoLoop({ src, style }) {
   const videoRef = React.useRef(null);
   React.useEffect(() => {
     const v = videoRef.current; if (!v || !src) return;
     const safePlay = () => { const p = v.play?.(); if (p?.catch) p.catch(() => {}); };
     const onCanPlay = () => safePlay();
-    const onEnded   = () => { v.currentTime = 0; safePlay(); };
-    const onPause   = () => { if (document.visibilityState === "visible") safePlay(); };
-    const onVis     = () => { if (document.visibilityState === "visible") safePlay(); };
+    const onEnded = () => { v.currentTime = 0; safePlay(); };
+    const onPause = () => { if (document.visibilityState === "visible") safePlay(); };
+    const onVis = () => { if (document.visibilityState === "visible") safePlay(); };
     safePlay();
     v.addEventListener("canplay", onCanPlay);
     v.addEventListener("ended", onEnded);
@@ -135,7 +153,6 @@ function VideoLoop({ src, style }) {
   return h("video", { ref: videoRef, src, muted: true, playsInline: true, autoPlay: true, preload: "metadata", disableRemotePlayback: true, style });
 }
 
-/* Avatar */
 function AvatarMedia({ src, isVideo, initials }) {
   const commonStyle = {
     width: 150, height: 150, borderRadius: "50%", objectFit: "cover",
@@ -150,24 +167,18 @@ function AvatarMedia({ src, isVideo, initials }) {
   return h(VideoLoop, { src, style: commonStyle });
 }
 
-/* ------------ component ------------ */
 export default function HomePage({ cardId = "101" }) {
   const [loading, setLoading] = React.useState(true);
   const [err, setErr] = React.useState("");
   const [info, setInfo] = React.useState(null);
-
-  // store "am/ru/en" but map to HTML lang later
   const [lang, setLang] = React.useState(
     (typeof window !== "undefined" ? localStorage.getItem("lang") : "am") || "am"
   );
-
   const [activeBrandKeyword, setActiveBrandKeyword] = React.useState("");
 
-  // map UI language code -> valid HTML lang for hyphenation
-  const htmlLang = lang === "am" ? "hy" : lang; // <-- ԱՅՍՏԵՂ Է ՖԻՔՍԸ
+  const htmlLang = lang === "am" ? "hy" : lang;
 
   React.useEffect(() => {
-    // keep <html lang="..."> in sync for hyphens: auto
     try { document.documentElement.lang = htmlLang; } catch {}
   }, [htmlLang]);
 
@@ -189,7 +200,6 @@ export default function HomePage({ cardId = "101" }) {
           }
         }
       } catch (e) {
-        console.error("HomePage fetch error", e);
         if (!killed) setErr(e.message || "Error");
       } finally {
         if (!killed) setLoading(false);
@@ -209,7 +219,7 @@ export default function HomePage({ cardId = "101" }) {
         : ["am", "ru", "en", "ar", "fr"];
 
     const nameByLang = {
-      hy: info?.company?.name?.am || "", // map Armenian content to 'hy'
+      hy: info?.company?.name?.am || "",
       ru: info?.company?.name?.ru || "",
       en: info?.company?.name?.en || "",
       ar: info?.company?.name?.ar || "",
@@ -229,7 +239,6 @@ export default function HomePage({ cardId = "101" }) {
     const nameColor = info?.company?.nameColor || "#111";
     const descColor = info?.description?.color || info?.profile?.aboutColor || "#666";
 
-    /* avatar selection */
     const avTop  = info?.avatar;
     const avProf = info?.profile?.avatar;
 
@@ -262,12 +271,11 @@ export default function HomePage({ cardId = "101" }) {
     const avatarAbs     = absSrc(avatarUrl);
     const avatarIsVideo = avatarType === "video" ? true : (avatarType === "image" ? false : isVideo(avatarAbs));
 
-    /* background */
     const bg = info?.background || { type: "color", color: "#ffffff", imageUrl: "", videoUrl: "" };
 
     const name = nameByLang[htmlLang] || nameByLang.hy || nameByLang.en || "—";
     const descriptionRaw = textByLang[htmlLang] || "";
-    const description = softHyphenate(descriptionRaw, htmlLang);
+    const description = htmlLang === "hy" ? hyphenateHy(descriptionRaw, "hy") : hyphenateHy(descriptionRaw, htmlLang);
 
     const [minCh, maxCh] = idealColsForLang(htmlLang);
 
@@ -278,7 +286,7 @@ export default function HomePage({ cardId = "101" }) {
       maxWidth: `clamp(${minCh}ch, 90%, ${maxCh}ch)`,
       textAlign: "justify",
       textJustify: "inter-word",
-      overflowWrap: "break-word", // <-- փափուկ, բայց չքանդի բառերը ինչպես "anywhere"
+      overflowWrap: "break-word",
       wordBreak: "break-word",
     };
 
@@ -307,8 +315,6 @@ export default function HomePage({ cardId = "101" }) {
     return h(
       "div",
       { className: "public-home", style: { position: "relative", width: "100%", height: "100%", minHeight: "100%", overflow: "hidden" } },
-
-      /* background layer */
       h(
         "div",
         {
@@ -330,48 +336,36 @@ export default function HomePage({ cardId = "101" }) {
             })
           : null
       ),
-
-      /* scroll layer */
       h(
         "div",
         { className: "public-scroll-layer", id: "publicScroll",
           style: { position: "relative", zIndex: 1, width: "100%", height: "100%", maxHeight: "100%",
                    overflowY: "auto", WebkitOverflowScrolling: "touch", padding: "12px" } },
-
         h(LangDropdown, { value: lang, onChange: setLang, langs: serverLangs }),
-
         showBrandInfo
           ? h(BrandInfoPage, { brandInfos, keyword: activeBrandKeyword, lang: htmlLang, onBack: () => setActiveBrandKeyword("") })
           : h(
               "div",
               { style: { position: "relative" } },
-
-              /* HERO CARD */
               h(
                 "section",
                 { className: "card", style: { textAlign: "center", paddingTop: 10, paddingBottom: 18 } },
                 h(AvatarMedia, { src: avatarAbs, isVideo: avatarIsVideo, initials: (name || "KH").slice(0, 2) }),
-
                 h("h1", { className: "hero-title", style: { color: nameColor, margin: "15px 0 4px", fontSize: 35 } }, name),
-
                 h(
                   "p",
                   {
                     className: "hero-desc",
                     style: descStyle,
-                    lang: htmlLang,                    // <-- ԱՅՍՏԵՂ Է ԿԻՐԱՌՎՈՒՄ
+                    lang: htmlLang,
                     dir: htmlLang === "ar" ? "rtl" : "ltr",
                   },
                   description
                 )
               ),
-
-              /* ICONS */
               links.length
                 ? h(IconsPage, { links, labelColor, chipColor, rowCardColor, layoutStyle, cols, glowEnabled, glowColor, lang: htmlLang })
                 : null,
-
-              /* BRANDS */
               brandsArray.length
                 ? h(BrandsPage, {
                     brands: brandsArray,
@@ -384,14 +378,11 @@ export default function HomePage({ cardId = "101" }) {
                     onKeywordClick: (kw) => setActiveBrandKeyword(kw),
                   })
                 : null,
-
-              /* SHARE / QR */
               h(SharePage, { cardId, info, lang: htmlLang })
             )
       )
     );
   } catch (e) {
-    console.error("HomePage render error", e, { info });
     return h("div", { className: "pad" }, "Render error: " + (e.message || String(e)));
   }
 }

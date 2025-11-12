@@ -22,6 +22,9 @@ const TEXT = {
     qrOnline: "ONLINE QR-CODE",
     qrOffline: "OFFLINE QR-CODE",
     offlineNote: "Սկանելուց հետո կարող եք պահպանել կոնտակտի մեջ։",
+    // ավելացրեցի, որ վերևի վերնագիրը undefined չլինի
+    qrTitle: "QR կոդեր",
+    qrDesc: "Ընտրեք Online կամ Offline QR տարբերակը՝ սկանելու համար։",
   },
   ru: {
     scanBtn: "СКАНИРОВАТЬ QR-КОД",
@@ -30,6 +33,8 @@ const TEXT = {
     qrOnline: "ОНЛАЙН QR-КОД",
     qrOffline: "ОФЛАЙН QR-КОД",
     offlineNote: "После сканирования можно сохранить в контактах.",
+    qrTitle: "QR-коды",
+    qrDesc: "Выберите онлайн или офлайн QR для сканирования.",
   },
   en: {
     scanBtn: "SCAN QR CODE",
@@ -38,6 +43,8 @@ const TEXT = {
     qrOnline: "ONLINE QR-CODE",
     qrOffline: "OFFLINE QR-CODE",
     offlineNote: "After scanning you can save it to your contacts.",
+    qrTitle: "QR Codes",
+    qrDesc: "Pick Online or Offline QR and scan.",
   },
   ar: {
     scanBtn: "مسح رمز QR",
@@ -46,6 +53,8 @@ const TEXT = {
     qrOnline: "رمز QR عبر الإنترنت",
     qrOffline: "رمز QR بدون اتصال",
     offlineNote: "بعد المسح يمكنك حفظه في جهات الاتصال.",
+    qrTitle: "رموز QR",
+    qrDesc: "اختر QR أونلاين أو أوفلاين للمسح.",
   },
   fr: {
     scanBtn: "SCANNER LE QR CODE",
@@ -54,6 +63,8 @@ const TEXT = {
     qrOnline: "QR-CODE EN LIGNE",
     qrOffline: "QR-CODE HORS LIGNE",
     offlineNote: "Après le scan vous pouvez l’enregistrer dans vos contacts.",
+    qrTitle: "Codes QR",
+    qrDesc: "Choisissez le QR en ligne ou hors ligne puis scannez.",
   },
 };
 
@@ -92,19 +103,21 @@ function defaultOnlineUrl(cardId) {
   return origin.replace(/\/+$/, "") + "/arm/card-" + (cardId || "100001") + "--.html";
 }
 
+// CRLF պարտադիր մի շարք կոնտակտ-կլայենտների համար (iOS/Outlook և այլն)
 function buildVCard(name, phone) {
   const safeName = (name || "").trim() || "KHContactum";
   const safePhone = (phone || "").trim();
   const lines = [
     "BEGIN:VCARD",
     "VERSION:3.0",
+    "N:" + safeName + ";;;;",
     "FN:" + safeName,
   ];
   if (safePhone) {
-    lines.push("TEL;TYPE=CELL:" + safePhone.replace(/\s+/g, ""));
+    lines.push("TEL;TYPE=CELL,VOICE;TYPE=pref:" + safePhone.replace(/\s+/g, ""));
   }
   lines.push("END:VCARD");
-  return lines.join("\n");
+  return lines.join("\r\n");
 }
 
 /** icon meta՝ png-ներով */
@@ -172,14 +185,79 @@ function ShareIcon({ kind, onClick }) {
     h("img", {
       src: meta.img,
       alt: meta.label,
-      loading: "lazy",                      // ⬅ lazy share icons
-      style: {
-        width: 36,
-        height: 36,
-        display: "block",
-      },
+      loading: "lazy",
+      style: { width: 36, height: 36, display: "block" },
     })
   );
+}
+
+/* =========
+   NEW: robust, cross-platform vCard saver
+   ========= */
+async function saveVCardUniversal({ name, phone, fileName = "contact.vcf" }) {
+  const vcard = buildVCard(name, phone);
+  const blob = new Blob([vcard], { type: "text/vcard;charset=utf-8" });
+  const file = new File([blob], fileName, { type: "text/vcard" });
+
+  // 1) Web Share Level 2 with files (most modern mobiles)
+  try {
+    if (typeof navigator !== "undefined" &&
+        navigator.share &&
+        typeof navigator.canShare === "function" &&
+        navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        title: "KHContactum",
+        text: "Save my contact",
+        files: [file],
+      });
+      return;
+    }
+  } catch (_) { /* ignore */ }
+
+  // 2) blob URL + <a download target="_blank"> keeps SPA alive
+  try {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    a.target = "_blank";            // ⬅ չի փոխում ներկա թաբը
+    a.rel = "noopener";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 500);
+    return;
+  } catch (_) { /* ignore */ }
+
+  // 3) iOS fallback: data URL new tab
+  try {
+    const encoded = encodeURIComponent(vcard);
+    const dataUrl = "data:text/x-vcard;charset=utf-8," + encoded;
+    window.open(dataUrl, "_blank", "noopener,noreferrer");
+    return;
+  } catch (_) { /* ignore */ }
+
+  // 4) ultimate fallback — show textarea to copy
+  const panel = document.createElement("div");
+  panel.style.cssText =
+    "position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;display:grid;place-items:center;";
+  const box = document.createElement("div");
+  box.style.cssText =
+    "background:#fff;max-width:560px;width:92%;padding:16px;border-radius:12px;";
+  const p = document.createElement("p");
+  p.textContent = "Copy the text below and save as contact.vcf:";
+  const ta = document.createElement("textarea");
+  ta.value = vcard;
+  ta.style.cssText = "width:100%;height:240px;";
+  const btn = document.createElement("button");
+  btn.textContent = "Close";
+  btn.className = "btn";
+  btn.onclick = () => document.body.removeChild(panel);
+  box.appendChild(p); box.appendChild(ta); box.appendChild(btn);
+  panel.appendChild(box);
+  document.body.appendChild(panel);
 }
 
 /**
@@ -232,7 +310,14 @@ export default function SharePage({ info, cardId, lang }) {
     if (href.startsWith("http")) {
       window.open(href, "_blank", "noopener,noreferrer");
     } else {
-      window.location.href = href;
+      // viber://, mailto: — բացվում է նոր կոնտեքստում
+      const a = document.createElement("a");
+      a.href = href;
+      a.target = "_blank";
+      a.rel = "noopener";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     }
   }
 
@@ -243,17 +328,12 @@ export default function SharePage({ info, cardId, lang }) {
     return onlineUrl;
   }
 
-  function downloadVCard() {
-    const vcard = buildVCard(offlineName, offlinePhone);
-    const blob = new Blob([vcard], { type: "text/vcard;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = (offlineName || "contact") + ".vcf";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  async function downloadVCard() {
+    await saveVCardUniversal({
+      name: offlineName,
+      phone: offlinePhone,
+      fileName: (offlineName || "contact").replace(/[^\w\-]+/g, "_") + ".vcf",
+    });
   }
 
   const qrValue = currentQrValue();
@@ -296,7 +376,7 @@ export default function SharePage({ info, cardId, lang }) {
         },
         onClick: () => setQrOpen(true),
       },
-      t.scanBtn           // ⬅ SCAN QR CODE բազմալեզու
+      t.scanBtn
     ),
 
     h(
@@ -308,7 +388,7 @@ export default function SharePage({ info, cardId, lang }) {
           color: shareTitleColor,
         },
       },
-      t.shareTitle        // ⬅ SHARE MY CARD բազմալեզու
+      t.shareTitle
     ),
 
     h(
@@ -345,7 +425,7 @@ export default function SharePage({ info, cardId, lang }) {
         },
         onClick: downloadVCard,
       },
-      t.addBtn            // ⬅ ADD ME TO THE CONTACT LIST բազմալեզու
+      t.addBtn
     ),
 
     qrOpen &&
@@ -369,7 +449,7 @@ export default function SharePage({ info, cardId, lang }) {
             style: {
               position: "relative",
               maxWidth: 360,
-              width: "90%",
+              width: 90 + "%",
               padding: 16,
               textAlign: "center",
             },
@@ -415,7 +495,7 @@ export default function SharePage({ info, cardId, lang }) {
                 },
                 onClick: () => setQrMode("online"),
               },
-              t.qrOnline       // ONLINE QR-CODE բազմալեզու
+              t.qrOnline
             ),
             h(
               "button",
@@ -429,14 +509,14 @@ export default function SharePage({ info, cardId, lang }) {
                 },
                 onClick: () => setQrMode("offline"),
               },
-              t.qrOffline      // OFFLINE QR-CODE բազմալեզու
+              t.qrOffline
             )
           ),
 
           h("img", {
             src: qrImgSrc,
             alt: "QR code",
-            loading: "lazy",                   // ⬅ lazy QR image
+            loading: "lazy",
             style: { width: 260, height: 260, margin: "0 auto 8px" },
           }),
 
@@ -444,7 +524,7 @@ export default function SharePage({ info, cardId, lang }) {
             h(
               "div",
               { className: "small", style: { marginTop: 4 } },
-              t.offlineNote     // բազմալեզու offline note
+              t.offlineNote
             )
         )
       )

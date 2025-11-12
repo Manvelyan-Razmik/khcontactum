@@ -563,7 +563,6 @@ export default function HomePage({ cardId = "101" }) {
                       color: nameColor,
                       margin: "15px 0 4px",
                       fontSize: 35,
-                      textShadow: "0 0 4px rgba(255,255,255,0.6)",
                     },
                   },
                   name

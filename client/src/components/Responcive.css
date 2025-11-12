@@ -760,3 +760,57 @@
     max-width: 90%;
   }
 }
+
+/* Armenian-friendly font stack */
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Armenian:wght@400;600;700&display=swap");
+
+* { font-family: "Noto Sans Armenian", system-ui, Arial, sans-serif; }
+
+/* ---- HERO ---- */
+.hero-title { font-weight: 800; letter-spacing: 0.2px; }
+
+.hero-desc {
+  /* native hyphenation — աշխատում է, եթե էլեմենտն ունի lang="hy" */
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  -ms-hyphens: auto;
+
+  /* որ չփշրի բառերը «ամեն տեղ» */
+  overflow-wrap: break-word;
+  word-break: break-word;
+
+  text-wrap: pretty;
+  line-height: 1.6;
+
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ======= Responsive typography ======= */
+@media (max-width: 480px) {
+  .public-scroll-layer { padding: 10px; }
+  .hero-title { font-size: 30px !important; margin: 12px 0 6px !important; }
+  .hero-desc  { font-size: 16px !important; }
+}
+@media (max-width: 360px) {
+  .hero-title { font-size: 28px !important; }
+  .hero-desc  { font-size: 15px !important; line-height: 1.55 !important; }
+}
+@media (max-width: 320px) {
+  .hero-title { font-size: 26px !important; }
+  .hero-desc  { font-size: 14px !important; line-height: 1.5 !important; }
+}
+@media (max-width: 280px) {
+  .hero-title { font-size: 24px !important; }
+  .hero-desc  { font-size: 13.5px !important; line-height: 1.45 !important; }
+}
+
+/* icons labels – ինչպես քննարկված էր */
+@media (max-width: 560px) {
+  .grid .label,
+  .icons-dzev2 .label,
+  .icons-dzev3 .label {
+    font-size: 11.5px !important;
+    line-height: 1.2;
+  }
+}

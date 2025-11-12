@@ -8,20 +8,13 @@ const h = React.createElement;
 /* ---------- helpers ---------- */
 function absLogo(u = "") {
   if (!u) return "";
-  // Arden absolute / data / blob url e
   if (/^(data:|https?:\/\/|blob:)/i.test(u)) return u;
-
-  // qcel "server/" skzbic, ete ka
   let clean = String(u).trim().replace(/^server\//i, "");
   if (!clean.startsWith("/")) clean = "/" + clean;
-
-  // API-ic vercnum enq origin-@ (http://localhost:5050 kam https://khcontactum.onrender.com)
   try {
     const apiUrl = new URL(API);
     return `${apiUrl.origin}${clean}`;
   } catch {
-    // anhamapatasxan API depqum veradardznum enq miayn path-@,
-    // vor kshatvi local dev-um
     return clean;
   }
 }
@@ -37,6 +30,9 @@ function pickLang(v, lang, fallbacks = ["am", "en", "ru", "ar", "fr"]) {
   return "";
 }
 
+/* Թույլ «զում», որ սպիտակ անկյունները դուրս մնան շրջանի կտրվածքից */
+const CROP_ZOOM = 1.1; // 1.08–1.12 միջակայքը OK է
+
 /**
  * Props:
  * - brands: [{ name, href, logo, linkType, keyword }]
@@ -44,7 +40,7 @@ function pickLang(v, lang, fallbacks = ["am", "en", "ru", "ar", "fr"]) {
  * - brandsTitleText
  * - brandsNameColor
  * - brandsCols: 1 | 2 | 3
- * - brandsBgColor (for cols=1)
+ * - brandsBgColor (for cols=1 list row bg)
  * - lang
  * - onKeywordClick(keyword) – optional
  */
@@ -85,9 +81,7 @@ export default function BrandsPage({
 
       h(
         "div",
-        {
-          style: { display: "grid", gap: 10, maxWidth: 560, margin: "0 auto" },
-        },
+        { style: { display: "grid", gap: 10, maxWidth: 560, margin: "0 auto" } },
         ...brands.map((b, i) => {
           const name = pickLang(b?.name, lang);
           const href = (b?.href || "").trim();
@@ -100,11 +94,8 @@ export default function BrandsPage({
             (linkType === "url" && href);
 
           const onClick = () => {
-            if (linkType === "keyword" && keyword && onKeywordClick) {
-              onKeywordClick(keyword);
-            } else if (linkType === "url" && href) {
-              window.open(href, "_blank", "noopener,noreferrer");
-            }
+            if (linkType === "keyword" && keyword && onKeywordClick) onKeywordClick(keyword);
+            else if (linkType === "url" && href) window.open(href, "_blank", "noopener,noreferrer");
           };
 
           return h(
@@ -123,51 +114,43 @@ export default function BrandsPage({
               },
               onClick,
             },
+            // ⬇️ Կոմպակտ շրջանաձև լոգո՝ crop-ով
             h(
               "div",
               {
                 style: {
                   width: 60,
                   height: 60,
-                  borderRadius: 12,
+                  borderRadius: "50%",
                   overflow: "hidden",
                   display: "grid",
                   placeItems: "center",
                   flexShrink: 0,
+                  background: "#111", // խուսափում է բարակ լուսավոր եզրից
                 },
               },
               b.logo
                 ? h("img", {
                     src: absLogo(b.logo),
                     alt: name || "brand",
-                    loading: "lazy",                           // ⬅ lazy logo
+                    loading: "lazy",
                     style: {
-                      width: "100%",
-                      height: "100%",
+                      width: `${CROP_ZOOM * 100}%`,
+                      height: `${CROP_ZOOM * 100}%`,
                       objectFit: "cover",
+                      objectPosition: "50% 50%",
+                      display: "block",
                     },
                   })
                 : h(
                     "span",
-                    {
-                      style: {
-                        color: "#777",
-                        fontWeight: 700,
-                        fontSize: 16,
-                      },
-                    },
+                    { style: { color: "#bbb", fontWeight: 700, fontSize: 16 } },
                     (name || "?").slice(0, 2).toUpperCase()
                   )
             ),
             h(
               "span",
-              {
-                style: {
-                  fontWeight: 700,
-                  fontSize: 15,
-                  color: brandsNameColor,
-                },
-              },
+              { style: { fontWeight: 700, fontSize: 15, color: brandsNameColor } },
               name || ""
             )
           );
@@ -208,16 +191,16 @@ export default function BrandsPage({
       { style: { display: "flex", justifyContent: "center" } },
       h(
         "div",
-          {
-            className: "brands-grid",
-            style: {
-              display: "grid",
-              gap: 16,
-              justifyContent: "center",
-              gridTemplateColumns:
-                cols === 2 ? "repeat(2, 120px)" : "repeat(3, 110px)",
-            },
+        {
+          className: "brands-grid",
+          style: {
+            display: "grid",
+            gap: 16,
+            justifyContent: "center",
+            gridTemplateColumns:
+              cols === 2 ? "repeat(2, 120px)" : "repeat(3, 110px)",
           },
+        },
         ...brands.map((b, i) => {
           const name = pickLang(b?.name, lang);
           const href = (b?.href || "").trim();
@@ -254,6 +237,7 @@ export default function BrandsPage({
                 cursor: isKeyword || isUrl ? "pointer" : "default",
               },
             },
+            // ⬇️ Շրջանաձև container + crop zoom
             h(
               "div",
               {
@@ -261,32 +245,28 @@ export default function BrandsPage({
                   width: 90,
                   height: 90,
                   borderRadius: "50%",
-                  background: "#f1f1f1",
+                  overflow: "hidden",
+                  background: "#111",
                   display: "grid",
                   placeItems: "center",
-                  overflow: "hidden",
                 },
               },
               b.logo
                 ? h("img", {
                     src: absLogo(b.logo),
                     alt: name || "brand",
-                    loading: "lazy",                       // ⬅ lazy logo
+                    loading: "lazy",
                     style: {
-                      width: "100%",
-                      height: "100%",
+                      width: `${CROP_ZOOM * 100}%`,
+                      height: `${CROP_ZOOM * 100}%`,
                       objectFit: "cover",
+                      objectPosition: "50% 50%",
+                      display: "block",
                     },
                   })
                 : h(
                     "span",
-                    {
-                      style: {
-                        color: "#777",
-                        fontWeight: 700,
-                        fontSize: 18,
-                      },
-                    },
+                    { style: { color: "#bbb", fontWeight: 700, fontSize: 18 } },
                     (name || "?").slice(0, 2).toUpperCase()
                   )
             ),

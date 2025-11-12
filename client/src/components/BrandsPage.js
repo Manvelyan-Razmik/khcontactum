@@ -267,7 +267,6 @@ export default function BrandsPage({
                   display: "grid",
                   placeItems: "center",
                   overflow: "hidden",
-                  boxShadow: "0 1px 6px rgba(0,0,0,.12)",
                 },
               },
               b.logo

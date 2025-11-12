@@ -128,29 +128,98 @@ function pickLang(v, lang, fallbacks = ["hy", "en", "ru", "ar", "fr"]) {
   return "";
 }
 
+/* =========================
+   ROBUST AUTOPLAY VIDEO LOOP
+   ========================= */
 function VideoLoop({ src, style }) {
   const videoRef = React.useRef(null);
+
   React.useEffect(() => {
-    const v = videoRef.current; if (!v || !src) return;
-    const safePlay = () => { const p = v.play?.(); if (p?.catch) p.catch(() => {}); };
+    const v = videoRef.current;
+    if (!v || !src) return;
+
+    // iOS / mobile safe attributes (must be real attributes, not only props)
+    v.muted = true;
+    v.setAttribute("muted", "");
+    v.playsInline = true;
+    v.setAttribute("playsinline", "");
+    v.autoplay = true;
+    v.setAttribute("autoplay", "");
+    v.loop = true; // defensive (we also manually loop)
+    v.setAttribute("loop", "");
+    v.controls = false;
+
+    // try play helper
+    const safePlay = () => {
+      const p = v.play?.();
+      if (p && p.catch) p.catch(() => {});
+    };
+
+    // intersection observer — resume whenever visible again
+    let io = null;
+    if ("IntersectionObserver" in window) {
+      io = new IntersectionObserver((entries) => {
+        entries.forEach((en) => {
+          if (en.isIntersecting) safePlay();
+        });
+      }, { threshold: 0.05 });
+      io.observe(v);
+    }
+
+    // user-gesture unlock for strict mobiles (first touch)
+    const onFirstTouch = () => {
+      safePlay();
+      window.removeEventListener("touchstart", onFirstTouch, { passive: true });
+    };
+    window.addEventListener("touchstart", onFirstTouch, { passive: true });
+
     const onCanPlay = () => safePlay();
-    const onEnded = () => { v.currentTime = 0; safePlay(); };
-    const onPause = () => { if (document.visibilityState === "visible") safePlay(); };
-    const onVis = () => { if (document.visibilityState === "visible") safePlay(); };
+    const onEnded   = () => { v.currentTime = 0; safePlay(); };
+    const onPause   = () => {
+      // If paused unexpectedly while visible, resume
+      if (document.visibilityState === "visible") safePlay();
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") safePlay();
+    };
+    const onPageShow = () => safePlay();
+    const onPageHide = () => { /* keep currentTime, resume on show */ };
+
+    // initial attempt
     safePlay();
+
     v.addEventListener("canplay", onCanPlay);
     v.addEventListener("ended", onEnded);
     v.addEventListener("pause", onPause);
-    document.addEventListener("visibilitychange", onVis);
+
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("pageshow", onPageShow);
+    window.addEventListener("pagehide", onPageHide);
+
     return () => {
+      if (io) io.disconnect();
+      window.removeEventListener("touchstart", onFirstTouch, { passive: true });
       v.removeEventListener("canplay", onCanPlay);
       v.removeEventListener("ended", onEnded);
       v.removeEventListener("pause", onPause);
-      document.removeEventListener("visibilitychange", onVis);
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("pageshow", onPageShow);
+      window.removeEventListener("pagehide", onPageHide);
     };
   }, [src]);
+
   if (!src) return null;
-  return h("video", { ref: videoRef, src, muted: true, playsInline: true, autoPlay: true, preload: "metadata", disableRemotePlayback: true, style });
+
+  return h("video", {
+    ref: videoRef,
+    src,
+    muted: true,
+    playsInline: true,
+    autoPlay: true,
+    preload: "auto",
+    disableRemotePlayback: true,
+    style,
+  });
 }
 
 function AvatarMedia({ src, isVideo, initials }) {
@@ -331,7 +400,16 @@ export default function HomePage({ cardId = "101" }) {
           ? h("video", {
               src: absSrc(bg.videoUrl),
               muted: true, playsInline: true, loop: true, autoPlay: true,
-              preload: "metadata", disableRemotePlayback: true,
+              preload: "auto", disableRemotePlayback: true,
+              // ensure attributes for iOS too
+              ref: (el) => {
+                if (!el) return;
+                el.muted = true;
+                el.setAttribute("muted", "");
+                el.setAttribute("playsinline", "");
+                el.setAttribute("autoplay", "");
+                el.setAttribute("loop", "");
+              },
               style: { width: "100%", height: "100%", objectFit: "cover" },
             })
           : null

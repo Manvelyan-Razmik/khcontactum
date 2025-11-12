@@ -37,27 +37,36 @@ function isVideo(u = "") {
   return /\.(mp4|webm|ogg)(\?.*)?$/i.test(u);
 }
 
-function softHyphenate(text, step = 6) {
+/* ---------- smarter soft-hyphenation for Armenian ---------- */
+/* URL/էլ․փոստ/թվային token-ներին չի դիպչում, շատ երկար հայ․ բառերի մեջ է միայն դնում \u00AD */
+function softHyphenate(text, lang = "am") {
   if (!text) return "";
-  return text.replace(/([\p{L}\p{M}]{7,})/gu, (word) =>
-    word.replace(new RegExp("(.{" + step + "})", "g"), "$1\u00AD")
-  );
+  const TOKENS = /(\bhttps?:\/\/\S+|\b\S+@\S+\.\S+|\b[\d._\-]+\b)/gi;
+  const MIN_LEN = lang === "am" ? 10 : 12;
+  const STEP    = lang === "am" ? 6  : 7;
+
+  return String(text)
+    .split(TOKENS)
+    .map(chunk => {
+      if (TOKENS.test(chunk)) return chunk; // պաշտպանված token
+      TOKENS.lastIndex = 0;
+      return chunk.replace(/[\p{Script=Armenian}]{10,}/gu, word => {
+        if (/\u00AD/.test(word)) return word;
+        // չբցնենք վերջում
+        return word.replace(new RegExp(`(.{${STEP}})(?=.)`, "g"), "$1\u00AD");
+      });
+    })
+    .join("");
 }
 
 function idealColsForLang(lang) {
   switch (lang) {
-    case "am":
-      return [30, 34];
-    case "ru":
-      return [32, 38];
-    case "en":
-      return [36, 42];
-    case "ar":
-      return [30, 34];
-    case "fr":
-      return [36, 42];
-    default:
-      return [34, 40];
+    case "am": return [30, 34];
+    case "ru": return [32, 38];
+    case "en": return [36, 42];
+    case "ar": return [30, 34];
+    case "fr": return [36, 42];
+    default:   return [34, 40];
   }
 }
 
@@ -75,51 +84,30 @@ function LangDropdown({ value, onChange, langs = ["am", "ru", "en"] }) {
 
   return h(
     "div",
-    {
-      className: "lang-dd",
-      style: { position: "absolute", right: 10, top: 10, zIndex: 2 },
-    },
+    { className: "lang-dd", style: { position: "absolute", right: 10, top: 10, zIndex: 2 } },
     h(
       "button",
-      {
-        className: "chip active",
-        onClick: () => setOpen((v) => !v),
-        style: { minWidth: 48 },
-      },
+      { className: "chip active", onClick: () => setOpen(v => !v), style: { minWidth: 48 } },
       (value || "am").toUpperCase()
     ),
-
-    open &&
-      h(
-        "div",
-        {
-          className: "card",
-          style: {
-            position: "absolute",
-            right: 0,
-            top: "calc(100% + 6px)",
-            padding: 6,
-            display: "grid",
-            gap: 6,
-            zIndex: 3,
+    open && h(
+      "div",
+      {
+        className: "card",
+        style: { position: "absolute", right: 0, top: "calc(100% + 6px)", padding: 6, display: "grid", gap: 6, zIndex: 3 },
+      },
+      ...langs.map((code) =>
+        h(
+          "button",
+          {
+            key: code,
+            className: "chip" + (code === value ? " active" : ""),
+            onClick: () => { localStorage.setItem("lang", code); onChange(code); setOpen(false); },
           },
-        },
-        ...langs.map((code) =>
-          h(
-            "button",
-            {
-              key: code,
-              className: "chip" + (code === value ? " active" : ""),
-              onClick: () => {
-                localStorage.setItem("lang", code);
-                onChange(code);
-                setOpen(false);
-              },
-            },
-            code.toUpperCase()
-          )
+          code.toUpperCase()
         )
       )
+    )
   );
 }
 
@@ -127,28 +115,14 @@ function LangDropdown({ value, onChange, langs = ["am", "ru", "en"] }) {
 function rgbaToCss(obj) {
   if (!obj || typeof obj !== "object") return "";
   const { r = 0, g = 0, b = 0, a = 1 } = obj;
-  return (
-    "rgba(" +
-    ((+r | 0) +
-      ", " +
-      (+g | 0) +
-      ", " +
-      (+b | 0) +
-      ", " +
-      (isFinite(+a) ? +a : 1)) +
-    ")"
-  );
+  return `rgba(${(+r | 0)}, ${(+g | 0)}, ${(+b | 0)}, ${(isFinite(+a) ? +a : 1)})`;
 }
 
 /* i18n pick */
 function pickLang(v, lang, fallbacks = ["am", "en", "ru", "ar", "fr"]) {
   if (!v) return "";
   if (typeof v === "string") return v;
-  const order = [lang].concat(
-    fallbacks.filter(function (x) {
-      return x !== lang;
-    })
-  );
+  const order = [lang].concat(fallbacks.filter(x => x !== lang));
   for (let i = 0; i < order.length; i++) {
     const k = order[i];
     const s = v && v[k];
@@ -170,30 +144,12 @@ function VideoLoop({ src, style }) {
       const p = v.play();
       if (p && p.catch) p.catch(() => {});
     };
-
     const onCanPlay = () => safePlay();
-
-    const onEnded = () => {
-      if (!v) return;
-      v.currentTime = 0;
-      safePlay();
-    };
-
-    const onPause = () => {
-      if (!v) return;
-      if (document.visibilityState === "visible") {
-        safePlay();
-      }
-    };
-
-    const onVisibility = () => {
-      if (document.visibilityState === "visible") {
-        safePlay();
-      }
-    };
+    const onEnded = () => { if (!v) return; v.currentTime = 0; safePlay(); };
+    const onPause = () => { if (!v) return; if (document.visibilityState === "visible") safePlay(); };
+    const onVisibility = () => { if (document.visibilityState === "visible") safePlay(); };
 
     safePlay();
-
     v.addEventListener("canplay", onCanPlay);
     v.addEventListener("ended", onEnded);
     v.addEventListener("pause", onPause);
@@ -215,7 +171,7 @@ function VideoLoop({ src, style }) {
     muted: true,
     playsInline: true,
     autoPlay: true,
-    preload: "metadata",       // ⬅ ավելի թեթև preload
+    preload: "metadata",
     disableRemotePlayback: true,
     style,
   });
@@ -224,45 +180,21 @@ function VideoLoop({ src, style }) {
 /* Avatar */
 function AvatarMedia({ src, isVideo, initials }) {
   const commonStyle = {
-    width: 150,
-    height: 150,
-    borderRadius: "50%",
-    objectFit: "cover",
-    margin: "0 auto 8px",
-    display: "block",
-    boxShadow: "0 10px 30px rgba(0,0,0,0.6)",
+    width: 150, height: 150, borderRadius: "50%", objectFit: "cover",
+    margin: "0 auto 8px", display: "block", boxShadow: "0 10px 30px rgba(0,0,0,0.6)",
   };
 
   if (!src) {
     return h(
       "div",
-      {
-        style: {
-          ...commonStyle,
-          background: "#f2f2f2",
-          display: "grid",
-          placeItems: "center",
-          fontWeight: 700,
-          color: "#999",
-        },
-      },
+      { style: { ...commonStyle, background: "#f2f2f2", display: "grid", placeItems: "center", fontWeight: 700, color: "#999" } },
       (initials || "KH").slice(0, 2).toUpperCase()
     );
   }
-
   if (!isVideo) {
-    return h("img", {
-      src,
-      alt: "avatar",
-      style: commonStyle,
-      loading: "lazy",        // ⬅ lazy load avatar image
-    });
+    return h("img", { src, alt: "avatar", style: commonStyle, loading: "lazy" });
   }
-
-  return h(VideoLoop, {
-    src,
-    style: commonStyle,
-  });
+  return h(VideoLoop, { src, style: commonStyle });
 }
 
 /* ------------ component ------------ */
@@ -272,8 +204,7 @@ export default function HomePage({ cardId = "101" }) {
   const [info, setInfo] = React.useState(null);
 
   const [lang, setLang] = React.useState(
-    (typeof window !== "undefined" ? localStorage.getItem("lang") : "am") ||
-      "am"
+    (typeof window !== "undefined" ? localStorage.getItem("lang") : "am") || "am"
   );
 
   const [activeBrandKeyword, setActiveBrandKeyword] = React.useState("");
@@ -291,15 +222,10 @@ export default function HomePage({ cardId = "101" }) {
 
         if (!killed) {
           setInfo(root);
-
           if (!localStorage.getItem("lang")) {
             const def =
-              root &&
-              root.default_lang &&
-              Array.isArray(root.available_langs)
-                ? root.available_langs.includes(root.default_lang)
-                  ? root.default_lang
-                  : undefined
+              root && root.default_lang && Array.isArray(root.available_langs)
+                ? (root.available_langs.includes(root.default_lang) ? root.default_lang : undefined)
                 : undefined;
             if (def) setLang(def);
           }
@@ -311,14 +237,12 @@ export default function HomePage({ cardId = "101" }) {
         if (!killed) setLoading(false);
       }
     })();
-    return function cleanup() {
-      killed = true;
-    };
+    return function cleanup() { killed = true; };
   }, [cardId]);
 
   if (loading) return h("div", { className: "pad" }, "Բեռնվում է…");
-  if (err) return h("div", { className: "pad" }, "Սխալ: " + err);
-  if (!info) return h("div", { className: "pad" }, "Տվյալ չկա");
+  if (err)     return h("div", { className: "pad" }, "Սխալ: " + err);
+  if (!info)   return h("div", { className: "pad" }, "Տվյալ չկա");
 
   // -------- SAFE RENDER WRAPPER --------
   try {
@@ -346,11 +270,10 @@ export default function HomePage({ cardId = "101" }) {
     };
 
     const nameColor = info?.company?.nameColor || "#111";
-    const descColor =
-      info?.description?.color || info?.profile?.aboutColor || "#666";
+    const descColor = info?.description?.color || info?.profile?.aboutColor || "#666";
 
-    /* ---------- avatar selection (type-aware + fallbacks) ---------- */
-    const avTop = info?.avatar;
+    /* ---------- avatar selection ---------- */
+    const avTop  = info?.avatar;
     const avProf = info?.profile?.avatar;
 
     const companyLogo =
@@ -360,8 +283,7 @@ export default function HomePage({ cardId = "101" }) {
         ? info.company.logo
         : info?.company?.logo?.imageUrl || "");
 
-    const fallbackLogo =
-      info?.assets?.logo_url || info?.logo_url || companyLogo || "";
+    const fallbackLogo = info?.assets?.logo_url || info?.logo_url || companyLogo || "";
 
     let avatarUrl = "";
     let avatarType = "";
@@ -370,85 +292,58 @@ export default function HomePage({ cardId = "101" }) {
       avatarUrl = avTop;
     } else if (avTop && typeof avTop === "object") {
       avatarType = avTop.type || "";
-      if (avatarType === "image") {
-        avatarUrl = avTop.imageUrl || avTop.videoUrl || "";
-      } else if (avatarType === "video") {
-        avatarUrl = avTop.videoUrl || avTop.imageUrl || "";
-      } else {
-        avatarUrl = avTop.imageUrl || avTop.videoUrl || "";
-      }
+      if (avatarType === "image")      avatarUrl = avTop.imageUrl || avTop.videoUrl || "";
+      else if (avatarType === "video") avatarUrl = avTop.videoUrl || avTop.imageUrl || "";
+      else                             avatarUrl = avTop.imageUrl || avTop.videoUrl || "";
     }
 
     if (!avatarUrl && avProf) {
-      if (typeof avProf === "string") {
-        avatarUrl = avProf;
-      } else if (typeof avProf === "object") {
-        avatarUrl = avProf.imageUrl || avProf.videoUrl || "";
-      }
+      if (typeof avProf === "string") avatarUrl = avProf;
+      else if (typeof avProf === "object") avatarUrl = avProf.imageUrl || avProf.videoUrl || "";
     }
 
-    if (!avatarUrl && fallbackLogo) {
-      avatarUrl = fallbackLogo;
-    }
+    if (!avatarUrl && fallbackLogo) avatarUrl = fallbackLogo;
 
-    const avatarAbs = absSrc(avatarUrl);
-    const avatarIsVideo =
-      avatarType === "video"
-        ? true
-        : avatarType === "image"
-        ? false
-        : isVideo(avatarAbs);
+    const avatarAbs     = absSrc(avatarUrl);
+    const avatarIsVideo = avatarType === "video" ? true : (avatarType === "image" ? false : isVideo(avatarAbs));
 
     /* ---------- background ---------- */
-    const bg =
-      info?.background || {
-        type: "color",
-        color: "#ffffff",
-        imageUrl: "",
-        videoUrl: "",
-      };
+    const bg = info?.background || { type: "color", color: "#ffffff", imageUrl: "", videoUrl: "" };
 
-    const name =
-      nameByLang[lang] || nameByLang.am || nameByLang.en || "—";
+    const name = nameByLang[lang] || nameByLang.am || nameByLang.en || "—";
     const descriptionRaw = textByLang[lang] || "";
-    const description = softHyphenate(descriptionRaw, 6);
+    const description = softHyphenate(descriptionRaw, lang);
 
-    const colsInfo = idealColsForLang(lang);
-    const minCh = colsInfo[0];
-    const maxCh = colsInfo[1];
+    const [minCh, maxCh] = idealColsForLang(lang);
 
     const descStyle = {
       color: descColor,
       margin: "15px auto 0",
       lineHeight: 1.6,
-      maxWidth: "clamp(" + minCh + "ch, 90%, " + maxCh + "ch)",
+      maxWidth: `clamp(${minCh}ch, 90%, ${maxCh}ch)`,
       textAlign: "justify",
       textJustify: "inter-word",
-      overflowWrap: "break-word",
-      hyphens: "auto",
-      textWrap: "pretty",
-      textAlignLast: "left",
+      overflowWrap: "anywhere",
     };
 
     const icons = info?.icons || {};
     const links = Array.isArray(icons.links) ? icons.links : [];
     const styles = icons?.styles || {};
 
-    const labelColor = styles.labelCss || styles.labelHEX || "";
-    const chipColor = styles.chipCss || rgbaToCss(styles.chipRGBA) || "";
-    const rowCardColor =
-      styles.rowCardCss || rgbaToCss(styles.rowCardRGBA) || "";
+    const labelColor  = styles.labelCss || styles.labelHEX || "";
+    const chipColor   = styles.chipCss || rgbaToCss(styles.chipRGBA) || "";
+    const rowCardColor = styles.rowCardCss || rgbaToCss(styles.rowCardRGBA) || "";
     const layoutStyle = styles.layoutStyle || "dzev1";
-    const cols = Number(styles.cols || 4);
+    const cols        = Number(styles.cols || 4);
     const glowEnabled = !!styles.glowEnabled;
-    const glowColor = styles.glowColor || "#7dd3fc";
+    const glowColor   = styles.glowColor || "#7dd3fc";
 
-    const brandsArray = Array.isArray(info?.brands) ? info.brands : [];
-    const brandsCols = Number(info?.brandsCols || 3);
+    const brandsArray      = Array.isArray(info?.brands) ? info.brands : [];
+    const brandsCols       = Number(info?.brandsCols || 3);
     const brandsTitleColor = info?.brandsTitleColor || "#000000";
-    const brandsTitleText = info?.brandsTitleText || "ՄԵՐ ԲՐԵՆԴՆԵՐԸ";
-    const brandsBgColor = info?.brandsBgColor || "#ffffff";
-    const brandsNameColor = info?.brandsNameColor || "#000000";
+    const brandsTitleText  = info?.brandsTitleText || "ՄԵՐ ԲՐԵՆԴՆԵՐԸ";
+    const brandsBgColor    = info?.brandsBgColor || "#ffffff";
+    const brandsNameColor  = info?.brandsNameColor || "#000000";
 
     const brandInfos = Array.isArray(info?.brandInfos) ? info.brandInfos : [];
     const showBrandInfo = !!activeBrandKeyword;
@@ -472,33 +367,19 @@ export default function HomePage({ cardId = "101" }) {
         {
           className: "public-bg-layer",
           style: {
-            position: "absolute",
-            inset: 0,
-            zIndex: 0,
-            pointerEvents: "none",
-            overflow: "hidden",
+            position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none", overflow: "hidden",
             background:
-              bg.type === "color"
-                ? bg.color || "#ffffff"
-                : bg.type === "image"
-                ? `url(${absSrc(bg.imageUrl)}) center/cover no-repeat`
-                : "transparent",
+              bg.type === "color" ? (bg.color || "#ffffff")
+              : bg.type === "image" ? `url(${absSrc(bg.imageUrl)}) center/cover no-repeat`
+              : "transparent",
           },
         },
         bg.type === "video" && bg.videoUrl
           ? h("video", {
               src: absSrc(bg.videoUrl),
-              muted: true,
-              playsInline: true,
-              loop: true,
-              autoPlay: true,
-              preload: "metadata", // ⬅ ոչ auto
-              disableRemotePlayback: true,
-              style: {
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-              },
+              muted: true, playsInline: true, loop: true, autoPlay: true,
+              preload: "metadata", disableRemotePlayback: true,
+              style: { width: "100%", height: "100%", objectFit: "cover" },
             })
           : null
       ),
@@ -510,30 +391,15 @@ export default function HomePage({ cardId = "101" }) {
           className: "public-scroll-layer",
           id: "publicScroll",
           style: {
-            position: "relative",
-            zIndex: 1,
-            width: "100%",
-            height: "100%",
-            maxHeight: "100%",
-            overflowY: "auto",
-            WebkitOverflowScrolling: "touch",
-            padding: "12px",
+            position: "relative", zIndex: 1, width: "100%", height: "100%", maxHeight: "100%",
+            overflowY: "auto", WebkitOverflowScrolling: "touch", padding: "12px",
           },
         },
 
-        h(LangDropdown, {
-          value: lang,
-          onChange: setLang,
-          langs: serverLangs,
-        }),
+        h(LangDropdown, { value: lang, onChange: setLang, langs: serverLangs }),
 
         showBrandInfo
-          ? h(BrandInfoPage, {
-              brandInfos,
-              keyword: activeBrandKeyword,
-              lang,
-              onBack: () => setActiveBrandKeyword(""),
-            })
+          ? h(BrandInfoPage, { brandInfos, keyword: activeBrandKeyword, lang, onBack: () => setActiveBrandKeyword("") })
           : h(
               "div",
               { style: { position: "relative" } },
@@ -541,30 +407,12 @@ export default function HomePage({ cardId = "101" }) {
               /* HERO CARD */
               h(
                 "section",
-                {
-                  className: "card",
-                  style: {
-                    textAlign: "center",
-                    paddingTop: 10,
-                    paddingBottom: 18,
-                  },
-                },
-                h(AvatarMedia, {
-                  src: avatarAbs,
-                  isVideo: avatarIsVideo,
-                  initials: (name || "KH").slice(0, 2),
-                }),
+                { className: "card", style: { textAlign: "center", paddingTop: 10, paddingBottom: 18 } },
+                h(AvatarMedia, { src: avatarAbs, isVideo: avatarIsVideo, initials: (name || "KH").slice(0, 2) }),
 
                 h(
                   "h1",
-                  {
-                    className: "hero-title",
-                    style: {
-                      color: nameColor,
-                      margin: "15px 0 4px",
-                      fontSize: 35,
-                    },
-                  },
+                  { className: "hero-title", style: { color: nameColor, margin: "15px 0 4px", fontSize: 35 } },
                   name
                 ),
 
@@ -572,10 +420,7 @@ export default function HomePage({ cardId = "101" }) {
                   "p",
                   {
                     className: "hero-desc",
-                    style: {
-                      ...descStyle,
-                  
-                    },
+                    style: descStyle,
                     lang,
                     dir: lang === "ar" ? "rtl" : "ltr",
                   },
@@ -619,10 +464,6 @@ export default function HomePage({ cardId = "101" }) {
     );
   } catch (e) {
     console.error("HomePage render error", e, { info });
-    return h(
-      "div",
-      { className: "pad" },
-      "Render error: " + (e.message || String(e))
-    );
+    return h("div", { className: "pad" }, "Render error: " + (e.message || String(e)));
   }
 }

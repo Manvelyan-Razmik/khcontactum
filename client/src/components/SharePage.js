@@ -22,9 +22,6 @@ const TEXT = {
     qrOnline: "ONLINE QR-CODE",
     qrOffline: "OFFLINE QR-CODE",
     offlineNote: "Սկանելուց հետո կարող եք պահպանել կոնտակտի մեջ։",
-    // ավելացրեցի, որ վերևի վերնագիրը undefined չլինի
-    qrTitle: "QR կոդեր",
-    qrDesc: "Ընտրեք Online կամ Offline QR տարբերակը՝ սկանելու համար։",
   },
   ru: {
     scanBtn: "СКАНИРОВАТЬ QR-КОД",
@@ -33,8 +30,6 @@ const TEXT = {
     qrOnline: "ОНЛАЙН QR-КОД",
     qrOffline: "ОФЛАЙН QR-КОД",
     offlineNote: "После сканирования можно сохранить в контактах.",
-    qrTitle: "QR-коды",
-    qrDesc: "Выберите онлайн или офлайн QR для сканирования.",
   },
   en: {
     scanBtn: "SCAN QR CODE",
@@ -43,8 +38,6 @@ const TEXT = {
     qrOnline: "ONLINE QR-CODE",
     qrOffline: "OFFLINE QR-CODE",
     offlineNote: "After scanning you can save it to your contacts.",
-    qrTitle: "QR Codes",
-    qrDesc: "Pick Online or Offline QR and scan.",
   },
   ar: {
     scanBtn: "مسح رمز QR",
@@ -53,8 +46,6 @@ const TEXT = {
     qrOnline: "رمز QR عبر الإنترنت",
     qrOffline: "رمز QR بدون اتصال",
     offlineNote: "بعد المسح يمكنك حفظه في جهات الاتصال.",
-    qrTitle: "رموز QR",
-    qrDesc: "اختر QR أونلاين أو أوفلاين للمسح.",
   },
   fr: {
     scanBtn: "SCANNER LE QR CODE",
@@ -63,8 +54,6 @@ const TEXT = {
     qrOnline: "QR-CODE EN LIGNE",
     qrOffline: "QR-CODE HORS LIGNE",
     offlineNote: "Après le scan vous pouvez l’enregistrer dans vos contacts.",
-    qrTitle: "Codes QR",
-    qrDesc: "Choisissez le QR en ligne ou hors ligne puis scannez.",
   },
 };
 
@@ -192,14 +181,14 @@ function ShareIcon({ kind, onClick }) {
 }
 
 /* =========
-   NEW: robust, cross-platform vCard saver
+   vCard saver — չի թողնում «դուրս թռնել» էջից
    ========= */
 async function saveVCardUniversal({ name, phone, fileName = "contact.vcf" }) {
   const vcard = buildVCard(name, phone);
   const blob = new Blob([vcard], { type: "text/vcard;charset=utf-8" });
   const file = new File([blob], fileName, { type: "text/vcard" });
 
-  // 1) Web Share Level 2 with files (most modern mobiles)
+  // 1) Web Share Level 2 with files → Contacts sheet (iOS/Android նոր տարբերակներ)
   try {
     if (typeof navigator !== "undefined" &&
         navigator.share &&
@@ -212,52 +201,39 @@ async function saveVCardUniversal({ name, phone, fileName = "contact.vcf" }) {
       });
       return;
     }
-  } catch (_) { /* ignore */ }
+  } catch (_) {}
 
-  // 2) blob URL + <a download target="_blank"> keeps SPA alive
+  // 2) Legacy Edge / IE
+  try {
+    if (window.navigator && typeof window.navigator.msSaveOrOpenBlob === "function") {
+      window.navigator.msSaveOrOpenBlob(blob, fileName);
+      return;
+    }
+  } catch (_) {}
+
+  // 3) Սովորական download՝ առանց նոր թաբի և առանց էջից դուրս գալու
   try {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = fileName;
-    a.target = "_blank";            // ⬅ չի փոխում ներկա թաբը
-    a.rel = "noopener";
+    a.download = fileName;       // ⬅ պարտադրում է save/open dialog
+    a.style.display = "none";
     document.body.appendChild(a);
-    a.click();
+    a.click();                   // ⬅ չի բացում նոր թաբ
     setTimeout(() => {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    }, 500);
+    }, 400);
     return;
-  } catch (_) { /* ignore */ }
+  } catch (_) {}
 
-  // 3) iOS fallback: data URL new tab
+  // 4) Վերջնական fallback — data: URL (կարող է բացել preview նոր թաբում, միայն եթե վերևները հնարավոր չեղան)
   try {
     const encoded = encodeURIComponent(vcard);
     const dataUrl = "data:text/x-vcard;charset=utf-8," + encoded;
     window.open(dataUrl, "_blank", "noopener,noreferrer");
     return;
-  } catch (_) { /* ignore */ }
-
-  // 4) ultimate fallback — show textarea to copy
-  const panel = document.createElement("div");
-  panel.style.cssText =
-    "position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;display:grid;place-items:center;";
-  const box = document.createElement("div");
-  box.style.cssText =
-    "background:#fff;max-width:560px;width:92%;padding:16px;border-radius:12px;";
-  const p = document.createElement("p");
-  p.textContent = "Copy the text below and save as contact.vcf:";
-  const ta = document.createElement("textarea");
-  ta.value = vcard;
-  ta.style.cssText = "width:100%;height:240px;";
-  const btn = document.createElement("button");
-  btn.textContent = "Close";
-  btn.className = "btn";
-  btn.onclick = () => document.body.removeChild(panel);
-  box.appendChild(p); box.appendChild(ta); box.appendChild(btn);
-  panel.appendChild(box);
-  document.body.appendChild(panel);
+  } catch (_) {}
 }
 
 /**
@@ -310,7 +286,7 @@ export default function SharePage({ info, cardId, lang }) {
     if (href.startsWith("http")) {
       window.open(href, "_blank", "noopener,noreferrer");
     } else {
-      // viber://, mailto: — բացվում է նոր կոնտեքստում
+      // viber://, mailto: — բացվում է նոր կոնտեքստում, SPA-ն մնում է տեղում
       const a = document.createElement("a");
       a.href = href;
       a.target = "_blank";
@@ -449,7 +425,7 @@ export default function SharePage({ info, cardId, lang }) {
             style: {
               position: "relative",
               maxWidth: 360,
-              width: 90 + "%",
+              width: "90%",
               padding: 16,
               textAlign: "center",
             },

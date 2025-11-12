@@ -131,7 +131,6 @@ export default function BrandsPage({
                   height: 60,
                   borderRadius: 12,
                   overflow: "hidden",
-                  background: "#f4f4f4",
                   display: "grid",
                   placeItems: "center",
                   flexShrink: 0,

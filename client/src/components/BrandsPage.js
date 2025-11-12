@@ -119,7 +119,6 @@ export default function BrandsPage({
                 padding: "10px 12px",
                 borderRadius: 14,
                 background: brandsBgColor,
-                boxShadow: "0 1px 4px rgba(0,0,0,.05)",
                 cursor: clickable ? "pointer" : "default",
               },
               onClick,

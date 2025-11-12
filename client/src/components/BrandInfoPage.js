@@ -196,7 +196,6 @@ function WorkerCard({ item, lang }) {
         background:"#f4f4f4",
         display:"grid",
         placeItems:"center",
-        boxShadow:"0 4px 16px rgba(0,0,0,.12)"
       }
     },
       avatarAbs
@@ -362,7 +361,6 @@ function WorkerCard({ item, lang }) {
             fontWeight:600,
             background: likeActive ? "#16a34a" : "#e5f7ea",
             color: likeActive ? "#fff" : "#166534",
-            boxShadow: likeActive ? "0 0 0 1px rgba(0,0,0,.15)" : "none",
             minWidth:70,
             justifyContent:"center"
           }
@@ -386,7 +384,6 @@ function WorkerCard({ item, lang }) {
             fontWeight:600,
             background: dislikeActive ? "#f97316" : "#fff7ed",
             color: dislikeActive ? "#fff" : "#9a3412",
-            boxShadow: dislikeActive ? "0 0 0 1px rgba(0,0,0,.15)" : "none",
             minWidth:70,
             justifyContent:"center"
           }

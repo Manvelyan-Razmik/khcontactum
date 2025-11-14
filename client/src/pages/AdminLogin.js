@@ -21,7 +21,7 @@ const LANGS = ["en", "am", "fr", "ar", "ru"];
 const TEXT = {
   am: {
     appTitle: "KHContactum",
-    username: "Օգտանուն",
+    username: "Մուտքանուն",
     password: "Գաղտնաբառ",
     login: "Մուտք",
     description:
@@ -94,6 +94,11 @@ export default function AdminLogin({
   const [lang, setLang] = useState(initialLang);
   const t = TEXT[lang] || TEXT.en;
 
+  // current URL (որպես fallback՝ "/admin")
+  const currentHref =
+    (typeof window !== "undefined" && window.location && window.location.href) ||
+    "/admin";
+
   function handleLangChange(next) {
     setLang(next);
     if (onLangChange) onLangChange(next);
@@ -129,16 +134,25 @@ export default function AdminLogin({
 
       h(
         "div",
-          {
-            className: "admin-login-panel",
-            dir: lang === "ar" ? "rtl" : "ltr",
-            style: lang === "ar" ? { textAlign: "right" } : {},
-          },
+        {
+          className: "admin-login-panel",
+          dir: lang === "ar" ? "rtl" : "ltr",
+          style: lang === "ar" ? { textAlign: "right" } : {},
+        },
 
         h(
           "div",
           { className: "admin-login-header-row" },
-          h("div", { className: "admin-login-app-title" }, t.appTitle),
+          // ⬇ KHContactum clickable link + full refresh
+          h(
+            "a",
+            {
+              href: currentHref,
+              className:
+                "admin-login-app-title admin-login-app-title-link",
+            },
+            t.appTitle
+          ),
           h(
             "select",
             {
@@ -207,11 +221,7 @@ export default function AdminLogin({
             t.login
           ),
           err &&
-            h(
-              "div",
-              { className: "admin-login-error" },
-              err
-            )
+            h("div", { className: "admin-login-error" }, err)
         ),
 
         h(

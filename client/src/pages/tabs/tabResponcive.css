@@ -156,3 +156,38 @@
     height: 72px !important;
   }
 }
+
+/* ====== ≥1440px — լեզուների row-ի տեքստերը փոքր են դառնում ====== */
+@media (min-width: 1440px) {
+  /* Languages row wrapper */
+  .card .row span,
+  .card .row p,
+  .card .row .small {
+    font-size: 12px !important;
+    white-space: nowrap;
+  }
+
+  /* Chip-երը փոքրացնենք, որպեսզի չքաշեն row-ը */
+  .chip {
+    padding: 4px 10px !important;
+    font-size: 12px !important;
+    min-width: 50px !important;
+  }
+
+  /* Վերևի հերթականության #1, #2 նշումները */
+  .row .small {
+    min-width: auto !important;
+  }
+
+  /* Arrow button-ները նույնպես փոքր */
+  .btn.small {
+    padding: 2px 6px !important;
+    font-size: 11px !important;
+  }
+
+  /* Լեզուների ամբողջ row-ը թող compressed լինի */
+  .card .row {
+    gap: 6px !important;
+    flex-wrap: nowrap;
+  }
+}

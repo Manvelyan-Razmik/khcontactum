@@ -695,3 +695,11 @@ div section{
   width: 340px;
 }
 
+.admin-login-app-title-link {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+.admin-login-app-title-link:hover {
+  opacity: 0.9;
+}

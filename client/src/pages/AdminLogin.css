@@ -39,13 +39,13 @@
 }
 
 .admin-login-lang-select {
-    width: 50px;
-    height: 30px;
-    background-color: white;
-    border-radius: 5px;
-    font-size: 14px;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.32);
-    padding: 2px;
+  width: 50px;
+  height: 30px;
+  background-color: white;
+  border-radius: 5px;
+  font-size: 14px;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.32);
+  padding: 2px;
 }
 
 /* form */
@@ -105,7 +105,9 @@
   color: #e2e8f0;
   text-align: justify;          /* ✅ երկու կողմերով հավասարեցում */
   text-justify: inter-word;
-  width: 360px;
+  width: 100%;                  /* լցնում է panel-ը */
+  max-width: 360px;             /* բայց չի անցնում 360px-ից */
+  margin-inline: auto;          /* կենտրոն */
 }
 
 /* լոգոների շարք */
@@ -116,7 +118,8 @@
   gap: 12px;
 }
 
-.admin-login-logo-img, .admin-login-logo-img1 {
+.admin-login-logo-img,
+.admin-login-logo-img1 {
   object-fit: contain;
   border-radius: 0;        /* հանում ենք կլորացումը */
   padding: 0;              /* ← հանում ենք ներքին բացվածքը */
@@ -125,13 +128,13 @@
 }
 
 .admin-login-logo-img {
-    height: 200px;
-    width: 200px;
+  height: 200px;
+  width: 200px;
 }
 
 .admin-login-logo-img1 {
-    height: 160px;
-    width: 200px;
+  height: 160px;
+  width: 200px;
 }
 
 
@@ -151,7 +154,9 @@
   display: flex;
   justify-content: center;
   gap: 10px;
-  width: 350px;
+  width: 100%;
+  max-width: 360px;
+  margin-inline: auto;
   flex-wrap: nowrap;
 }
 
@@ -180,6 +185,7 @@
   opacity: 0.9;
 }
 
+/* հին lang-select, եթե պետք գա PhoneShell-ի վրա */
 .lang-select {
   position: absolute;
   top: 20px;
@@ -199,7 +205,6 @@
 .lang-select:hover {
   background: rgba(255, 255, 255, 0.15);
 }
-
 
 
 /* փոքր էկրանների fine-tune */
@@ -222,24 +227,21 @@
 /* ========== 1280px – 1365px (laptop) ========== */
 @media (min-width: 1280px) and (max-width: 1365px) {
   .admin-login-root {
-    align-items: center;
+    align-items: center;              /* PhoneShell-ի մեջ մոդալն կենտրոնանա vertical */
   }
 
   .admin-login-panel {
     max-width: 400px;
   }
 
-  .admin-login-description {
-    width: 380px;
-    font-size: 12px;
-  }
-
+  .admin-login-description,
   .admin-login-contacts-row {
-    width: 380px;
+    max-width: 380px;
+    font-size: 12px;
   }
 }
 
-/* ========== 1366px – 1439px (laptop HD) ========== */
+/* ========== 1366px – 1439px (HD laptop) ========== */
 @media (min-width: 1366px) and (max-width: 1439px) {
   .admin-login-root {
     align-items: center;
@@ -253,13 +255,10 @@
     font-size: 21px;
   }
 
-  .admin-login-description {
-    width: 390px;
-    font-size: 12.5px;
-  }
-
+  .admin-login-description,
   .admin-login-contacts-row {
-    width: 390px;
+    max-width: 390px;
+    font-size: 12.5px;
   }
 
   .admin-login-logo-img {
@@ -287,13 +286,13 @@
     font-size: 22px;
   }
 
-  .admin-login-description {
-    width: 400px;
+  .admin-login-description,
+  .admin-login-contacts-row {
+    max-width: 400px;
     font-size: 13px;
   }
 
   .admin-login-contacts-row {
-    width: 400px;
     gap: 12px;
   }
 
@@ -318,14 +317,14 @@
     letter-spacing: 0.05em;
   }
 
-  .admin-login-description {
-    width: 410px;
+  .admin-login-description,
+  .admin-login-contacts-row {
+    max-width: 410px;
     font-size: 13px;
     line-height: 1.7;
   }
 
   .admin-login-contacts-row {
-    width: 410px;
     gap: 14px;
   }
 
@@ -334,4 +333,3 @@
     max-height: 64px;
   }
 }
-

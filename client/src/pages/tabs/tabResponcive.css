@@ -1,11 +1,77 @@
-/* ====== 1280px – 1365px (small desktop) ====== */
+/* ========= Common safe styles for this tab ========= */
+
+/* Որ HomeTab-ի content-ը հանկարծ չտա horizontal scroll */
+.pad {
+  box-sizing: border-box;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* row-ը default flex անենք (եթե այլ տեղ արդեն չունես) */
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ստեղի chip-երն ու փոքր կոճակները ընդհանուր փոքր-ինչ կոմպակտ են */
+.chip {
+  font-weight: 600;
+  border-radius: 999px;
+}
+
+.btn.small {
+  line-height: 1;
+}
+
+/* ========= 1280px – 1365px (small desktop) ========= */
 @media (min-width: 1280px) and (max-width: 1365.98px) {
-  .pad {
-    max-width: 960px;
-    margin: 0 auto;
-    padding: 24px 20px;
+  .company-title {
+    font-size: 24px;
+    letter-spacing: 0.01em;
   }
 
+  .card {
+    padding: 12px 14px;
+    border-radius: 10px;
+  }
+
+  /* Լեզուների row-երը թող wrap անեն, որ լայն չլինեն */
+  .card .row {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .chip {
+    font-size: 12px;
+    min-width: 50px;
+    padding: 4px 10px;
+  }
+
+  .btn.small {
+    font-size: 11px;
+    padding: 2px 6px;
+  }
+
+  .card .row span,
+  .card .row .small {
+    font-size: 12px;
+  }
+
+  /* "Ընտրիր, թե որ լեզուներն են ակտիվ..." */
+  .card > .small {
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  .input,
+  .textarea {
+    font-size: 14px;
+  }
+}
+
+/* ========= 1366px – 1439px (classic desktop) ========= */
+@media (min-width: 1366px) and (max-width: 1439.98px) {
   .company-title {
     font-size: 26px;
     letter-spacing: 0.02em;
@@ -16,30 +82,42 @@
     border-radius: 12px;
   }
 
-  .row {
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 10px;
+  .card .row {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .chip {
+    font-size: 12px;
+    min-width: 52px;
+    padding: 4px 11px;
+  }
+
+  .btn.small {
+    font-size: 11px;
+    padding: 2px 7px;
+  }
+
+  .card .row span,
+  .card .row .small {
+    font-size: 12px;
+  }
+
+  .card > .small {
+    font-size: 13px;
+    line-height: 1.5;
   }
 
   .input,
   .textarea {
     font-size: 14px;
   }
-
-  .textarea {
-    min-height: 110px;
-  }
 }
 
-/* ====== 1366px – 1439px (classic desktop) ====== */
-@media (min-width: 1366px) and (max-width: 1439.98px) {
-  .pad {
-    max-width: 1040px;
-    margin: 0 auto;
-    padding: 26px 24px;
-  }
-
+/* ========= 1440px – 1919px (large desktop) ========= */
+/* Այստեղ հատուկ քո ասած լեզուների տակ գտնվող p/small տեքստի չափն ենք փոքրացնում,
+   որ aj-dzax scroll չլինի ու row-երը չլարեն լայնությունը */
+@media (min-width: 1440px) and (max-width: 1919.98px) {
   .company-title {
     font-size: 28px;
     letter-spacing: 0.03em;
@@ -50,36 +128,44 @@
     border-radius: 14px;
   }
 
-  .row {
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 12px;
+  /* ԼԵԶՈՒՆԵՐ card-ի "Ընտրիր, թե որ լեզուներն են ակտիվ..." տեքստը */
+  .card > .small {
+    font-size: 12px;      /* 👈 հենց էս ա քո խնդրածը */
+    line-height: 1.5;
+    max-width: 100%;
+  }
+
+  /* լեզուների row-երը հաստատ թող wrap անեն, ոչ թե լայնանան */
+  .card .row {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* Լեզվի անունը (span label) և "Default / #2" փոքր գրառումները */
+  .card .row span,
+  .card .row .small {
+    font-size: 12px;
+  }
+
+  .chip {
+    font-size: 12px;
+    min-width: 50px;
+    padding: 4px 10px;
+  }
+
+  .btn.small {
+    font-size: 11px;
+    padding: 2px 7px;
   }
 
   .input,
   .textarea {
     font-size: 15px;
   }
-
-  .textarea {
-    min-height: 120px;
-    line-height: 1.6;
-  }
-
-  .btn {
-    padding: 8px 14px;
-    font-size: 13px;
-  }
 }
 
-/* ====== 1440px – 1919px (large desktop) ====== */
-@media (min-width: 1440px) and (max-width: 1919.98px) {
-  .pad {
-    max-width: 1160px;
-    margin: 0 auto;
-    padding: 28px 28px;
-  }
-
+/* ========= ≥1920px (full HD և ավելի) ========= */
+@media (min-width: 1920px) {
   .company-title {
     font-size: 30px;
     letter-spacing: 0.04em;
@@ -90,104 +176,36 @@
     border-radius: 16px;
   }
 
-  .row {
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 14px;
+  /* Լեզուների card-ի վերևի բացատրությունն այստեղ էլ պահում ենք փոքր,
+     որ լայնական scroll չլինի */
+  .card > .small {
+    font-size: 12px;
+    line-height: 1.6;
+  }
+
+  .card .row {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .card .row span,
+  .card .row .small {
+    font-size: 12px;
+  }
+
+  .chip {
+    font-size: 12px;
+    min-width: 52px;
+    padding: 4px 12px;
+  }
+
+  .btn.small {
+    font-size: 11px;
+    padding: 2px 8px;
   }
 
   .input,
   .textarea {
     font-size: 15px;
-  }
-
-  .textarea {
-    min-height: 130px;
-  }
-
-  /* լեզուների քարտիկները մի քիչ ավելի clean */
-  .chip {
-    min-width: 64px;
-    font-size: 13px;
-  }
-}
-
-/* ====== ≥1920px (full HD և ավելի լայն էկրաններ) ====== */
-@media (min-width: 1920px) {
-  .pad {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 32px 32px;
-  }
-
-  .company-title {
-    font-size: 32px;
-    letter-spacing: 0.05em;
-  }
-
-  .card {
-    padding: 20px 22px;
-    border-radius: 18px;
-  }
-
-  .row {
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 16px;
-  }
-
-  .input,
-  .textarea {
-    font-size: 16px;
-  }
-
-  .textarea {
-    min-height: 140px;
-  }
-
-  .btn {
-    padding: 9px 16px;
-    font-size: 14px;
-  }
-
-  /* Avatar preview-ը մի քիչ ավելի մեծ՝ մեծ մոնիտորի համար */
-  .pad .row + div > div[style*="border-radius:50%"] {
-    width: 72px !important;
-    height: 72px !important;
-  }
-}
-
-/* ====== ≥1440px — լեզուների row-ի տեքստերը փոքր են դառնում ====== */
-@media (min-width: 1440px) {
-  /* Languages row wrapper */
-  .card .row span,
-  .card .row p,
-  .card .row .small {
-    font-size: 12px !important;
-    white-space: nowrap;
-  }
-
-  /* Chip-երը փոքրացնենք, որպեսզի չքաշեն row-ը */
-  .chip {
-    padding: 4px 10px !important;
-    font-size: 12px !important;
-    min-width: 50px !important;
-  }
-
-  /* Վերևի հերթականության #1, #2 նշումները */
-  .row .small {
-    min-width: auto !important;
-  }
-
-  /* Arrow button-ները նույնպես փոքր */
-  .btn.small {
-    padding: 2px 6px !important;
-    font-size: 11px !important;
-  }
-
-  /* Լեզուների ամբողջ row-ը թող compressed լինի */
-  .card .row {
-    gap: 6px !important;
-    flex-wrap: nowrap;
   }
 }

@@ -1,0 +1,158 @@
+/* ====== 1280px – 1365px (small desktop) ====== */
+@media (min-width: 1280px) and (max-width: 1365.98px) {
+  .pad {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 24px 20px;
+  }
+
+  .company-title {
+    font-size: 26px;
+    letter-spacing: 0.02em;
+  }
+
+  .card {
+    padding: 14px 16px;
+    border-radius: 12px;
+  }
+
+  .row {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 10px;
+  }
+
+  .input,
+  .textarea {
+    font-size: 14px;
+  }
+
+  .textarea {
+    min-height: 110px;
+  }
+}
+
+/* ====== 1366px – 1439px (classic desktop) ====== */
+@media (min-width: 1366px) and (max-width: 1439.98px) {
+  .pad {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 26px 24px;
+  }
+
+  .company-title {
+    font-size: 28px;
+    letter-spacing: 0.03em;
+  }
+
+  .card {
+    padding: 16px 18px;
+    border-radius: 14px;
+  }
+
+  .row {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 12px;
+  }
+
+  .input,
+  .textarea {
+    font-size: 15px;
+  }
+
+  .textarea {
+    min-height: 120px;
+    line-height: 1.6;
+  }
+
+  .btn {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+}
+
+/* ====== 1440px – 1919px (large desktop) ====== */
+@media (min-width: 1440px) and (max-width: 1919.98px) {
+  .pad {
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 28px 28px;
+  }
+
+  .company-title {
+    font-size: 30px;
+    letter-spacing: 0.04em;
+  }
+
+  .card {
+    padding: 18px 20px;
+    border-radius: 16px;
+  }
+
+  .row {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 14px;
+  }
+
+  .input,
+  .textarea {
+    font-size: 15px;
+  }
+
+  .textarea {
+    min-height: 130px;
+  }
+
+  /* լեզուների քարտիկները մի քիչ ավելի clean */
+  .chip {
+    min-width: 64px;
+    font-size: 13px;
+  }
+}
+
+/* ====== ≥1920px (full HD և ավելի լայն էկրաններ) ====== */
+@media (min-width: 1920px) {
+  .pad {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 32px 32px;
+  }
+
+  .company-title {
+    font-size: 32px;
+    letter-spacing: 0.05em;
+  }
+
+  .card {
+    padding: 20px 22px;
+    border-radius: 18px;
+  }
+
+  .row {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 16px;
+  }
+
+  .input,
+  .textarea {
+    font-size: 16px;
+  }
+
+  .textarea {
+    min-height: 140px;
+  }
+
+  .btn {
+    padding: 9px 16px;
+    font-size: 14px;
+  }
+
+  /* Avatar preview-ը մի քիչ ավելի մեծ՝ մեծ մոնիտորի համար */
+  .pad .row + div > div[style*="border-radius:50%"] {
+    width: 72px !important;
+    height: 72px !important;
+  }
+}

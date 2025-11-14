@@ -1,6 +1,5 @@
 // client/src/tabs/HomeTab.js
 import React from "react";
-import "../tabs/tabResponcive.css";
 import {
   adminInfoFetch,   // alias of adminGetInfo(token)
   adminInfoSave,    // alias of adminSaveInfo(token, payload)

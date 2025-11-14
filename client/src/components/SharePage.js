@@ -13,6 +13,9 @@ import igIcon    from "../img/insta.png";
 
 const h = React.createElement;
 
+/* ===== base domain for online links ===== */
+const PUBLIC_BASE = "https://khcontactum.com/";
+
 /* ===== helpers ===== */
 function pickLang(v, lang, fallbacks = ["am", "en", "ru", "ar", "fr"]) {
   if (!v) return "";
@@ -23,6 +26,16 @@ function pickLang(v, lang, fallbacks = ["am", "en", "ru", "ar", "fr"]) {
     if (s && String(s).trim()) return String(s).trim();
   }
   return "";
+}
+
+/** Խաղաղ գլոբալ normalizer, որ link-ը միշտ լինի լիարժեք https://... */
+function ensureAbsoluteUrl(u) {
+  const raw = (u || "").toString().trim();
+  if (!raw) return "";
+  if (/^https?:\/\//i.test(raw)) return raw;
+  // եթե user-ը պահել է միայն path կամ domain, սարքում ենք https://khcontactum.com/path
+  const path = raw.replace(/^https?:\/\/[^/]+\//i, "").replace(/^\/+/, "");
+  return PUBLIC_BASE + path;
 }
 
 /* ===== i18n text ===== */
@@ -37,6 +50,9 @@ const TEXT = {
     // share defaults
     shareDefault: "Դիտիր իմ KHContactum.com թվային քարտը։",
     mailSubject: "KHContactum թվային քարտ",
+    // եթե ունես qrTitle / qrDesc, կարող ես լրացնել
+    qrTitle: "KHContactum QR",
+    qrDesc: "Սկանավորեք կամ կիսվեք ձեր թվային քարտով։",
   },
   ru: {
     scanBtn: "СКАНИРОВАТЬ QR-КОД",
@@ -47,6 +63,8 @@ const TEXT = {
     offlineNote: "После сканирования можно сохранить в контактах.",
     shareDefault: "Посмотри мою цифровую карточку KHContactum.com.",
     mailSubject: "Цифровая визитка KHContactum",
+    qrTitle: "QR KHContactum",
+    qrDesc: "Отсканируйте или поделитесь своей цифровой визиткой.",
   },
   en: {
     scanBtn: "SCAN QR CODE",
@@ -57,6 +75,8 @@ const TEXT = {
     offlineNote: "After scanning you can save it to your contacts.",
     shareDefault: "Check out my KHContactum.com digital card.",
     mailSubject: "KHContactum digital card",
+    qrTitle: "KHContactum QR",
+    qrDesc: "Scan or share your digital business card.",
   },
   ar: {
     scanBtn: "مسح رمز QR",
@@ -67,6 +87,8 @@ const TEXT = {
     offlineNote: "بعد المسح يمكنك حفظه في جهات الاتصال.",
     shareDefault: "اطّلع على بطاقتي الرقمية على KHContactum.com.",
     mailSubject: "بطاقة KHContactum الرقمية",
+    qrTitle: "رمز QR لـ KHContactum",
+    qrDesc: "امسح أو شارك بطاقتك الرقمية.",
   },
   fr: {
     scanBtn: "SCANNER LE QR CODE",
@@ -77,6 +99,8 @@ const TEXT = {
     offlineNote: "Après le scan vous pouvez l’enregistrer dans vos contacts.",
     shareDefault: "Découvrez ma carte numérique KHContactum.com.",
     mailSubject: "Carte numérique KHContactum",
+    qrTitle: "QR KHContactum",
+    qrDesc: "Scannez ou partagez votre carte numérique.",
   },
 };
 
@@ -92,8 +116,11 @@ const DEFAULT_QUICK = {
 
 function normalizeShare(raw) {
   const s = raw && typeof raw === "object" ? raw : {};
+  // NEW: normalize onlineUrl, որ միշտ ունենա https://... ձև
+  const normalizedOnlineUrl = ensureAbsoluteUrl(s.onlineUrl || "");
+
   return {
-    onlineUrl: (s.onlineUrl || "").toString().trim(),
+    onlineUrl: normalizedOnlineUrl,
     offlineFullName: (s.offlineFullName || "").toString().trim(),
     offlinePhone: (s.offlinePhone || "").toString().trim(),
     quick: Object.assign({}, DEFAULT_QUICK, s.quick || {}),
@@ -108,12 +135,14 @@ function normalizeShare(raw) {
   };
 }
 
+/* default link – fallback, եթե admin share.onlineUrl չկա */
 function defaultOnlineUrl(cardId) {
-  if (typeof window === "undefined") {
-    return "https://vcard.l4.am/arm/card-" + (cardId || "100001") + "--.html";
+  if (typeof window !== "undefined" && window.location?.href) {
+    // օգտագործում ենք հենց բացված public card–ի URL–ը
+    return ensureAbsoluteUrl(window.location.href);
   }
-  const origin = window.location.origin || "http://localhost:5173";
-  return origin.replace(/\/+$/, "") + "/arm/card-" + (cardId || "100001") + "--.html";
+  // server-side / no window → գոնե domain + id
+  return ensureAbsoluteUrl((cardId && String(cardId)) || "");
 }
 
 /* ---------- small UA helpers ---------- */
@@ -258,7 +287,11 @@ export default function SharePage({ info, cardId, lang }) {
 
   const t = TEXT[activeLang] || TEXT.am;
 
-  const onlineUrl = share.onlineUrl || defaultOnlineUrl(cardId);
+  // վերջնական onlineUrl – արդեն normalize արած, անհրաժեշտության դեպքում fallback
+  const onlineUrl = ensureAbsoluteUrl(
+    share.onlineUrl || defaultOnlineUrl(cardId)
+  );
+
   const offlineName = share.offlineFullName || info?.company?.name?.en || "";
   const offlinePhone = share.offlinePhone || "";
 
@@ -284,7 +317,12 @@ export default function SharePage({ info, cardId, lang }) {
   const enabledKinds = Object.keys(quick).filter((k) => quick[k]);
 
   function onShare(kind) {
-    const url = onlineUrl || (typeof window !== "undefined" ? window.location.href : "");
+    // ՄԻՇՏ օգտագործում ենք normalize արած absolute URL
+    const url =
+      onlineUrl ||
+      (typeof window !== "undefined"
+        ? ensureAbsoluteUrl(window.location.href)
+        : "");
     if (!url) return;
 
     if (kind === "ig" && typeof navigator !== "undefined" && navigator.share) {

@@ -5,6 +5,7 @@ import { adminSaveInfo } from "../../api.js";
 const h = React.createElement;
 
 /* ---------- CONSTANTS ---------- */
+// ՄԻՇՏ լիարժեք https domain, վերջում մի հատ "/"-ով
 const ONLINE_BASE = "https://khcontactum.com/"; // fixed, non-editable
 
 /* ---------- UI TEXT BY LANGUAGE ---------- */

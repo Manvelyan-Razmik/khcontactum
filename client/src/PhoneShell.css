@@ -849,15 +849,14 @@ div section{
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: #f4f4f4;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .admin-login-contact img {
-  max-width: 22px;
-  max-height: 22px;
+  max-width: 20px;
+  max-height: 20px;
   display: block;
 }
 

@@ -852,7 +852,7 @@ export default function AdminDashboard({ token: propToken, onLogout, uiLang = "e
           "div",
           {
             className: "text-sm mb-2",
-            style: { opacity: 0.75, width: 350 },
+            style: { opacity: 0.75, width: 280 },
           },
           T.langsDescription
         ),

@@ -207,22 +207,7 @@
 }
 
 
-/* փոքր էկրանների fine-tune */
-@media (max-width: 400px) {
-  .admin-login-panel {
-    padding: 8px 2px 18px;
-  }
 
-  .admin-login-logo-img {
-    max-width: 130px;
-    height: 64px;
-  }
-
-  .admin-login-contact {
-    width: 48px;
-    height: 48px;
-  }
-}
 
 /* ========== 1280px – 1365px (laptop) ========== */
 @media (min-width: 1280px) and (max-width: 1365px) {

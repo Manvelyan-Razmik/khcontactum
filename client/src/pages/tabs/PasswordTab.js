@@ -272,7 +272,7 @@ export default function PasswordTab({ token: propToken, uiLang = "en" }) {
         onClick: () => setShow((s) => ({ ...s, [k]: !s[k] })),
         style: { marginLeft: 6 },
       },
-      show[k] ? "🙈" : "👁"
+      show[k] ? "🤦‍♀️" : "🙎‍♀️"
     );
 
   const Checklist = ({ ok, label }) =>

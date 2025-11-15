@@ -817,12 +817,12 @@ div section{
 }
 
 .admin-login-logo-img {
-  max-height: 100px;
+  max-height: 140px;
   object-fit: contain;
 }
 
 .admin-login-logo-img1 {
-  max-height: 100px;
+  max-height: 138px;
   object-fit: contain;
 }
 
@@ -855,8 +855,8 @@ div section{
 }
 
 .admin-login-contact img {
-  max-width: 20px;
-  max-height: 20px;
+  max-width: 22px;
+  max-height: 22px;
   display: block;
 }
 

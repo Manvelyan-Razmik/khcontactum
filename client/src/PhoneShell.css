@@ -807,24 +807,7 @@ div section{
   overflow-y: auto;
 }
 
-/* Logos */
-.admin-login-logos {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  margin-bottom: 12px;
-}
 
-.admin-login-logo-img {
-  max-height: 140px;
-  object-fit: contain;
-}
-
-.admin-login-logo-img1 {
-  max-height: 138px;
-  object-fit: contain;
-}
 
 /* Contacts */
 .admin-login-contacts {

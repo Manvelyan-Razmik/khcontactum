@@ -809,40 +809,6 @@ div section{
 
 
 
-/* Contacts */
-.admin-login-contacts {
-  border-top: 1px solid #eee;
-  padding-top: 10px;
-}
-
-.admin-login-contacts-label {
-  font-size: 13px;
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-
-.admin-login-contacts-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.admin-login-contact {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.admin-login-contact img {
-  max-width: 22px;
-  max-height: 22px;
-  display: block;
-}
-
 /* ====== 480px և ներքև (հիմնական mobile) ====== */
 @media (max-width: 480px) {
   .admin-login-root {

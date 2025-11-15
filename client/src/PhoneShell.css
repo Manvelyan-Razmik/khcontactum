@@ -817,12 +817,12 @@ div section{
 }
 
 .admin-login-logo-img {
-  max-height: 40px;
+  max-height: 100px;
   object-fit: contain;
 }
 
 .admin-login-logo-img1 {
-  max-height: 38px;
+  max-height: 100px;
   object-fit: contain;
 }
 
